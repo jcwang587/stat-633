@@ -1,0 +1,117 @@
+---
+title: "Psych graph"
+author: "Nikki Lin"
+date: "2024-03-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(stargazer)
+library(tidyverse)
+library(broom)
+library(countrycode)
+library(plotly)
+library(patchwork)
+library(stargazer)
+```
+
+```{r, results='hide'}
+#| echo: false
+#| message: false
+#| warning: false
+
+hw5 <- read.csv("HW5.data.csv")
+
+psydata <- hw5 %>% 
+  dplyr::select(Country, happiness.score, Social.support, Freedom.to.make.life.choices, Perceptions.of.corruption) 
+
+psydata2 <- psydata %>% 
+    pivot_longer(c("Social.support", "Freedom.to.make.life.choices", "Perceptions.of.corruption"), names_to = "Predictor", values_to = "Score")
+
+psydata2$Continent <- countrycode(sourcevar = psydata2[["Country"]], origin = "country.name",
+                            destination = "continent")
+```
+
+```{r, results='hide'}
+#| echo: false
+#| message: false
+#| warning: false
+psy_pred_model2 <- lm(happiness.score ~ Social.support + Freedom.to.make.life.choices + Perceptions.of.corruption, data = hw5)
+summary(psy_pred_model2)
+```
+
+# Plotting
+
+```{r, results='hide'}
+#| echo: false
+#| message: false
+#| warning: false
+plot1 <- ggplot(psydata2, aes(Score, happiness.score, color = Continent)) + 
+  geom_point(aes(ids = Country), alpha = 0.5) +
+  theme(legend.title = element_blank()) +
+  facet_wrap(~Predictor, labeller = labeller(Predictor = 
+    c("Freedom.to.make.life.choices" = "Life Choice Freedom",
+      "Perceptions.of.corruption" = "Corruption Perception",
+      "Social.support" = "Social Support")
+  )) +
+  geom_smooth(method='lm', se = F, alpha = 0.5) + 
+  theme_bw() +
+  ylab("Happiness Score")
+
+plotly1 <- ggplotly(plot1)
+plotly1
+```
+
+```{r, results='hide'}
+#| echo: false
+#| message: false
+#| warning: false
+plot2 <- ggplot(psydata2, aes(x = Score, y = happiness.score, color = Predictor)) + 
+  geom_smooth(method='lm', aes(fill = Predictor), se = TRUE, alpha = 0.5) +
+  scale_fill_manual(values=c(Freedom.to.make.life.choices="plum3",
+                             Perceptions.of.corruption="khaki1",
+                             Social.support= "mistyrose")) +
+    scale_color_manual(values=c(Freedom.to.make.life.choices="mediumpurple4",
+                             Perceptions.of.corruption="orange2",
+                             Social.support="palevioletred3")) +
+  theme_bw() +
+  ylab("Happiness Score")
+
+plotly2 <- ggplotly(plot2, tooltip = c("text"))
+plotly2
+```
+
+```{r, echo = F}
+subplot(plotly2, plotly1, nrows = 2, margin = 0.065, heights = c(0.5, 0.5)) %>% 
+  layout(legend = list(title = " ", font = list(size = 10)), 
+         title = "Psychological Predictors of Happiness",
+         annotations = list(
+           list(x = -0.08 , y = 0.5, text = "Happiness Score",
+                     font = list(size = 12),
+                     textangle = 270,
+                     showarrow = F, xref='paper', yref='paper', size=48),
+           list(x = 0.5 , y = -0.10, text = "Predicter Score",
+                     font = list(size = 12),
+                     textangle = 0,
+                     showarrow = F, xref='paper', yref='paper', size=48))
+  )
+                      
+```
+
+# Table
+
+```{r, echo=F, results='asis'}
+
+stargazer(psy_pred_model2, header=F, type = "html", 
+          title            = "Multiple Regression Predicting Happiness Score",
+          covariate.labels = c("Social support", 
+                               "Life choice freedom", 
+                               "Corruption perception",
+                               "Constant",
+          dep.var.labels   = ("Happiness score")))
+```
+
+
+
+

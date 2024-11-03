@@ -1,0 +1,121 @@
+---
+title: 'HW 4: Lecture 5'
+author: 'Name: Jiacheng Wang'
+output: 
+  html_document:
+    toc: TRUE
+number_sections: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+# Question 1
+
+Recall the histogram for cut categories from the diamonds data set:
+
+```{r, message=FALSE, warning=FALSE}
+library(plotly)
+library(tidyverse)
+
+diamonds %>%
+  plot_ly( x = ~cut, showlegend = FALSE ) %>%
+  add_histogram(hoverinfo = "x+y") %>%
+  dplyr::group_by( cut ) %>%
+  summarise(n = n()) %>%
+  add_text(
+    text = ~scales::comma(n), y = ~n,
+    textposition = "top middle",
+    cliponaxis = FALSE,
+    hoverinfo = "none"
+  )
+```
+
+Please add to it the following changes:
+
+1. make the bar chart a stacked bar chart: so that the x-axis values are still according to the variable cut, but the internal division of each bar is according to the `clarity` variable.
+2. change the colors of the bar segments to be in accordance with the `"Blues"` palette.
+3. make sure to have the tooltip content for each bar segment as it is in the below plot (“The cut is … such diamonds!”)
+4. set the color of the font in the tooltip to red (hint: `hoverlabel`).
+5. set the background of the tooltip to yellow.
+6. set the background color of the entire plot to `"pink"`.
+7. set the background color of the plotting area to `"lightgray"`.
+8. set the borders of the bars to black and thickness (`span`) of 1.
+9. set the color of the x-axis labels to `"green"`.
+10. set the title of the x-axis to `"Cut"` (instead of “cut”).
+11. set the color of the x-axis title to `"darkred"` and its font to `"Times New Roman"`.
+12. change the color of the y-axis labels to `"darkorange"` (be careful not to change other things with it).
+13. remove the y-axis title.
+14. set the left margin of the plot to 25px.
+15. change the color of the text values to `"red"`. No tooltip is associated with these values.
+16. add the title `"Ugly, ugly plot"` in the `"Old Standard TT"` font at the top left corner.
+
+In addition, make sure that the data that `plot_ly` utilizes is the minimum data necessary for the plot.
+
+**Notes:**
+
+1. The title of the sample plot is `"Pretty ugly plot"`, which I applied here instead of `"Ugly, ugly plot"`.
+2. The color of the x-axis labels is required to be green, which I applied here instead of the color used in the sample plot.
+
+
+```{r}
+total_counts <- diamonds %>%
+  group_by(cut) %>%
+  summarise(total = n())
+
+diamonds_summary <- diamonds %>%
+  count(cut, clarity)
+
+p <- diamonds %>%
+  count(cut, clarity) %>%  # Count the number of diamonds for each combination of cut and clarity
+  plot_ly() %>%
+  add_bars(
+    x = ~cut, 
+    y = ~n, 
+    color = ~clarity,
+    colors = "Blues",
+    hoverinfo = 'text',
+    text = ~paste("The cut is", cut, "\nthe clarity", clarity, "\nand there are", n, "such diamonds!"),
+    marker = list(line = list(color = 'black', width = 1)), # Set the borders of the bars to black with a thickness of 1
+    showlegend = FALSE,
+    textposition = "none"
+    ) %>%
+  layout(
+    barmode = 'stack',
+    hoverlabel = list(bgcolor = "yellow", font = list(color = "red")), # Set tooltip text color to red and background to yellow
+    paper_bgcolor = "pink", # Set the background color of the entire plot to pink
+    plot_bgcolor = "lightgray", # Set the background color of the plotting area to lightgray
+    xaxis = list(
+      tickfont = list(color = "green"), # Set the color of the x-axis labels to green
+      title = "Cut", # Set the title of the x-axis to "Cut"
+      titlefont = list(color = "darkred", family = "Times New Roman") # Set the color and font of the x-axis title
+      ),
+    yaxis = list(tickfont = list(color = "darkorange"), title = list(text = "")), # Set the color of the y-axis labels to darkorange and remove the y-axis title
+    margin = list(l = 25), # Set the left margin of the plot to 25px
+    title = list(text = "Pretty ugly plot", font = list(family = "Old Standard TT"), x = 0, y = 1) # Add the title "Ugly, ugly plot" in the "Old Standard TT" font at the top left corner
+    )
+
+# Add the text annotations for total counts
+for (i in 1:nrow(total_counts)) {
+  p <- p %>% add_text(
+    data = total_counts[i, ],
+    x = ~cut,
+    y = ~total,
+    text = ~total,
+    textposition = 'top middle',
+    hoverinfo = 'none',
+    showlegend = FALSE,
+    textfont = list(color = "red") 
+  )
+}
+
+p
+```
+
+
+
+
+

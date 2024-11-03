@@ -1,0 +1,140 @@
+---
+title: 'HW 10: Lecture 14 - Extra Credit'
+author: 'Name: Jiacheng Wang'
+output: 
+  html_document:
+    toc: TRUE
+number_sections: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+# Question 1 - Lecture 14
+
+Understand and explain the structure and function of the event inputs created from:
+
+```
+  "plotly_relayout",
+  "plotly_hover" / "plotly_unhover"
+  "plotly_click" / "plotly_doubleclick"
+  "plotly_legendclick" / "plotly_legenddoubleclick"
+```
+
+Do this for scatter traces, histogram traces and mapbox+scatter traces (not all events will be meaningful in all types of traces)
+
+1. "plotly_relayout"
+
+Function: This event is triggered when there is a change in the layout properties, such as zooming or panning on a plot. It provides information about the new layout (e.g., axis range).
+
+Scatter Traces: It can be used to update annotations or adjust the display based on the zoomed or panned area.
+
+Histogram Traces: Useful for adjusting bin sizes or ranges dynamically based on user interaction with the plot axes.
+
+Mapbox + Scatter Traces: It adjusts the view of the map (zoom or center) and can also affect the displayed data depending on the new geographical focus.
+
+2. "plotly_hover" / "plotly_unhover"
+
+Function: These events are triggered when a mouse pointer hovers over (or leaves) a data point.
+
+Scatter Traces: Display additional information about the hovered point, often used to show tooltips.
+
+Histogram Traces: Can show information about the bin, such as count or range of values in that bin.
+
+Mapbox + Scatter Traces: Display details about a location or data point on the map, such as tooltips or specific annotations.
+
+3. "plotly_click" / "plotly_doubleclick"
+
+Function: Triggered when a data point is clicked or double-clicked. Often used to drill down into more detailed data or to select/unselect data points.
+
+Scatter Traces: Can be used to select a point, highlight it, or display detailed data related to the point.
+
+Histogram Traces: Clicking on a bin might display more granular data or perform operations based on the selected bin.
+
+Mapbox + Scatter Traces: Clicking on a map point could open up more detailed information about the location or trigger other interactive elements like modal dialogs.
+
+4. "plotly_legendclick" / "plotly_legenddoubleclick"
+
+Function: These events are triggered when an item in the legend is clicked or double-clicked. Typically used to show/hide a particular data series or modify its properties.
+
+Scatter Traces: Toggle the visibility of a scatter series or modify its appearance.
+Histogram Traces: Similar use as in scatter traces; for instance, toggling the display of a set of bins grouped by a categorical variable.
+
+Mapbox + Scatter Traces: While not typically useful for changing data visibility on a map directly, it might control the visibility of scatter points overlaid on the map.
+
+
+# Question 2 - Lecture 14
+Start from the following app:
+
+```
+ui <- fluidPage(
+  plotlyOutput("p"),
+  tableOutput("table")
+)
+
+server <- function(input, output, session) {
+  
+  # keep track of which cars have been hovered on
+  cars <- reactiveVal()
+  
+  # On hover, the key field of the event data contains the car name
+  # Add that name to the set of all "selected" cars
+  observeEvent(event_data("plotly_hover"), {
+    car <- event_data("plotly_hover")$customdata
+    cars_old_new <- c(cars(), car)
+    cars(unique(cars_old_new))
+  })
+  
+  # clear the set of cars when a double-click occurs
+  observeEvent(event_data("plotly_doubleclick"), {
+    cars(NULL)
+  })
+  
+  output$p <- renderPlotly({
+    
+    # if the car is selected, paint it red
+    cols <- ifelse(row.names(mtcars) %in% cars(), "red", "black")
+    
+    mtcars %>%
+      plot_ly(
+        x = ~wt, y = ~mpg, 
+        customdata = row.names(mtcars), 
+        marker = list(color = cols)
+      ) %>%
+      add_markers()
+  })
+  
+  output$table <- renderTable({
+    filter(mtcars, row.names(mtcars) %in% cars())
+  })
+  
+}
+
+shinyApp(ui, server)
+```
+
+a. explain the role of `customdata` here.
+
+In this Shiny app, `customdata` is used to store the row names of the `mtcars` dataset, which effectively represent the names of the cars. When a marker (representing a car) on the Plotly plot is hovered over, `event_data`("plotly_hover") captures this event and the `customdata` associated with the hovered marker. This data (car name) is then used to track which cars have been "selected" by the hover action.
+
+b. Modify the above app so that hovering again over a red point changes its color back to black and removes it from the output table. In order to perform this task efficiently, think carefully about what we need to change, in which part of the code it lies. A solution may only involve modifying/expanding one line of code.
+
+Please see the functional script for the modified app `HW10_shiny_app_Jiacheng_Wang.R` in the same directory as this Rmd file. The key change is in the `observeEvent` block for "plotly_hover" as follows:
+
+```
+observeEvent(event_data("plotly_hover"), {
+  car <- event_data("plotly_hover")$customdata
+  if (car %in% cars()) {
+    cars(setdiff(cars(), car))
+  } else {
+    cars_old_new <- c(cars(), car)
+    cars(unique(cars_old_new))
+  }
+})
+```
+
+
+

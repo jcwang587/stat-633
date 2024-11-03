@@ -1,0 +1,199 @@
+---
+title: 'HW 3: ggplot, Introduction to R shiny'
+author: 'Name: Jiacheng Wang'
+output: 
+  html_document:
+    toc: TRUE
+number_sections: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+# Question 1
+
+Create a graph similar to and based on the work you did in Homework 2, Question 1. This time, depict on the y-axis the life expectancy of each country relative to the life expectancy in the US (for every given year).
+
+Add a layer to the plot that highlights the marker for the US throughout the animated sequence (in any reasonable way you choose). Add a layer to the plot that shows a horizontal line at the y-value of 1.
+
+```{r, message=FALSE, warning=FALSE}
+# Load necessary libraries
+library(tidyr)
+library(dplyr)
+library(countrycode)
+library(ggplot2)
+library(plotly)
+```
+
+```{r, warning=FALSE, message=FALSE}
+# Read the datasets
+gdp_per_cap <- read.csv("income_per_person_gdppercapita_ppp_inflation_adjusted.csv", header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
+life_exp <- read.csv("life_expectancy_years.csv", header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
+pop <- read.csv("population_total.csv", header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
+
+# Reshape the datasets to long format
+gdp_long <- pivot_longer(gdp_per_cap, cols = -country, names_to = "year", values_to = "gdp_per_cap")
+life_exp_long <- pivot_longer(life_exp, cols = -country, names_to = "year", values_to = "life_expectancy")
+pop_long <- pivot_longer(pop, cols = -country, names_to = "year", values_to = "population")
+
+# Merge the datasets
+data_combined <- gdp_long %>%
+  inner_join(life_exp_long, by = c("country", "year")) %>%
+  inner_join(pop_long, by = c("country", "year"))
+
+# Convert year to numeric and ensure country names are character
+data_combined <- data_combined %>%
+  mutate(year = as.numeric(year), country = as.character(country))
+
+# Standardize country names
+data_combined$country <- countrycode(data_combined$country, "country.name", "iso3c")
+
+# Filter for years up to and including 2020
+data_final <- filter(data_combined, year <= 2020)
+
+# Calculate relative life expectancy
+us_life_exp <- data_final %>% 
+  filter(country == "USA") %>% 
+  select(year, life_expectancy)
+
+data_final <- data_final %>%
+  left_join(us_life_exp, by = "year", suffix = c("", "_us")) %>%
+  mutate(relative_life_exp = life_expectancy / life_expectancy_us) %>%
+  select(-life_expectancy, -life_expectancy_us)
+
+# Create the animated plot
+gg <- ggplot(data_final, aes(x = gdp_per_cap, y = relative_life_exp)) +
+  geom_point(aes(size = population, frame = year, ids = country)) +
+  geom_point(data = filter(data_final, country == "USA"), 
+             aes(x = gdp_per_cap, y = relative_life_exp, size = population, frame = year, ids = country), 
+             color = "red") +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "blue") +
+  scale_x_log10() +
+  theme(legend.title = element_blank()) 
+
+# Enhance plot with plotly for interactivity
+ggplotly(gg)
+```
+
+As depicted in the interactive plot, the x-axis represents the GDP per capita of each country, while the y-axis represents the life expectancy of each country relative to the life expectancy in the US. The size of the points is proportional to the population of each country, and the color of the points represents the year. The red point represents the US. The dashed blue line represents the life expectancy in the US.
+
+
+
+# Question 2
+
+Manipulate or add any new variables to the plot from question 1 and create another plot (based on a similar template) that will help you tell a story you think is interesting and perhaps obscured by the way the data and plot is currently organized. If you decide to add additional data from other sources, you may only do this for a partial period, but if you do so make sure that you cover at least 40 years. Write a short description that instructs the user on where and what to look at in the interactive plot in order to gain insight and see supporting evidence for the claims you make.
+
+
+Look at the Color and Shape Differences: These will help identify data points related to the USA and Russia quickly.
+
+Observe the Trends: By dragging through the years, users can see how economic policies, global events, and health impacts have influenced the life expectancy relative to the GDP per capita in both countries.
+
+1. The Russian Revolution and Civil War (1917-1922)
+Event Overview: The Russian Revolution of 1917, comprising the February and October revolutions, led to the overthrow of the Tsarist autocracy and the rise of the Soviet Union. The subsequent Civil War from 1918 to 1922 involved multiple factions vying for control, resulting in significant loss of life, economic turmoil, and widespread social upheaval.
+
+2. The Great Patriotic War / World War II (1941-1945)
+Event Overview: The Soviet Union's involvement in World War II, known in Russia as the Great Patriotic War, had a profound impact on the country. The immense human cost, material destruction, and heroic victory over Nazi Germany are pivotal chapters in Russian history.
+
+3. The End of the Cold War and the Dissolution of the Soviet Union (1989-1991)
+Event Overview: The period marking the end of the Cold War and the dissolution of the Soviet Union represents a monumental shift in global politics and had a direct impact on Russia. The transition from a superpower status within a communist framework to a post-Soviet state faced numerous economic, social, and political challenges.
+
+```{r, message=FALSE, warning=FALSE}
+# Filter for Russia and the USA
+data_focus <- filter(data_final, country %in% c("USA", "RUS"))
+
+# Create the plot
+gg_focus <- ggplot(data_focus, aes(x = gdp_per_cap, y = relative_life_exp, color = country)) +
+  geom_point(aes(size = population, frame = year, ids = country)) +
+  scale_color_manual(values = c("USA" = "red", "RUS" = "blue")) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "blue") +
+  scale_x_log10() +
+  theme(legend.title = element_blank()) 
+
+# Enhance plot with plotly for interactivity
+ggplotly(gg_focus)
+```
+
+
+
+# Question 3
+
+Complete our gappminder app so that it uses `ggplot` to show a similar plot to the gapminder plot from homework 1 question 2.1 (same as in the introduction):
+
+1. Data is filtered first according to year
+2. Then, data is filtered according to the continent
+3. Lastly, (a feature we add here to the original functionality) also filter the data according to quantiles of interest in income (so that if the range is 0-50, we’ll see the lower half of countries for a given year)
+4. The plot should be based on `ggplot` (not using `ggplotly` here).
+5. You may use the small gapminder dataset as demonstrated in class or utilize the larger one you prepared in the second homework assignment.
+
+**Important**: In the HTML you submit, please comment on the meaning of the additional filtering by income quantiles in step 3. One way to help clarify to yourself this meaning may be performing the filtrations in a different order. How do the results differ? What kind of insights are can be made by the different methods? In order to exemplify your arguments, add to your answer individual interactive plots created with `ggplotly` for specific years (no animation) where the data are filtered by quantiles of interest and year before being sent to `ggplot`.
+
+
+**Part 1: Complete the app**
+
+Please see the *HW3_Gapminder_APP_Jiacheng_Wang.R* script file for the complete R shiny app.
+
+**Part 2: Comment on the meaning of the additional filtering by income quantiles in step 3**
+
+Filtering by income quantiles allows users to focus on specific segments of countries based on their GDP per capita within a given year and continent. This feature adds a nuanced layer to data analysis by enabling the examination of disparities within and across continents. For instance, filtering to view the lower 50% of countries by income within a continent can highlight issues related to economic inequality, poverty, and development challenges. Conversely, focusing on the upper 50% can reveal patterns among more economically prosperous nations, such as common factors contributing to higher standards of living or economic resilience.
+
+The order of filtration can significantly influence the insights gained. Filtering by year first ensures that all subsequent analyses are within the context of a specific time frame, which is crucial for historical comparisons. Filtering next by continent allows for a regional focus, but the final step of filtering by income quantiles within those regions is where different insights can emerge based on the order:
+
+ - Year → Continent → Income Quantiles: This approach provides a clear view of how countries within a specific continent compare to each other economically in a given year. It's useful for understanding regional economic dynamics and inequalities.
+
+ - Year → Income Quantiles → Continent: If you were to filter by income across all continents before filtering by a specific continent, the results would differ. This approach would provide insights into how a continent's countries distribute across global income quantiles before focusing on intra-continental comparisons.
+
+Changing the order emphasizes different aspects of the data, from global economic standings to regional disparities, each offering unique insights.
+
+**Part 3: Individual interactive plots created with `ggplotly` for specific years**
+
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(plotly)
+library(dplyr)
+
+df <- readRDS("gapminder.rds") 
+
+# Example for Year 2007, Continent Asia, and lower 50% income quantiles
+year_selected <- 2007
+continent_selected <- "Asia"
+income_quantile_range <- c(0, 0.5) # Lower 50%
+
+filtered_df <- df %>%
+  filter(year == year_selected, continent == continent_selected) %>%
+  arrange(gdpPercap) %>%
+  slice(floor((n() * income_quantile_range[1]) + 1):ceiling(n() * income_quantile_range[2]))
+
+# Create the ggplot
+p <- ggplot(filtered_df, aes(x = gdpPercap, y = lifeExp, size = pop, color = country)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  labs(x = "GDP per Capita", y = "Life Expectancy", size = "Population", color = "Country") +
+  theme_gray()
+
+# Convert to ggplotly for an interactive plot
+ggplotly(p)
+```
+
+```{r, message=FALSE, warning=FALSE}
+# Filter for Year 2007 and lower 50% income quantiles globally
+filtered_global_df <- df %>%
+  filter(year == year_selected) %>%
+  arrange(gdpPercap) %>%
+  slice(floor((n() * income_quantile_range[1]) + 1):ceiling(n() * income_quantile_range[2])) %>%
+  filter(continent == continent_selected) # Now filter by continent
+
+# Create the ggplot
+p_global <- ggplot(filtered_global_df, aes(x = gdpPercap, y = lifeExp, size = pop, color = country)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  labs(x = "GDP per Capita", y = "Life Expectancy", size = "Population", color = "Country") +
+  theme_gray()
+
+# Convert to ggplotly for an interactive plot
+ggplotly(p_global)
+```
+
+By comparing the two plots, we can see the difference in the distribution of countries across income quantiles using two different filtering orders. The first plot focuses on the lower 50% of countries within Asia in 2007, while the second plot shows the lower 50% of countries globally in 2007, then filters by continent. The first plot provides insights into the economic disparities within Asia, while the second plot highlights the distribution of countries across income quantiles globally before focusing on a specific continent. This comparison demonstrates how the order of filtration can influence the insights gained from the data.

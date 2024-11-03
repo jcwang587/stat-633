@@ -1,0 +1,192 @@
+---
+title: "HW5"
+author: "Nikki Lin"
+date: "2024-03-09"
+output: html_document
+---
+```{r}
+library(readr)
+library(stargazer)
+library(tidyverse)
+library(leaps)
+library(HH)
+library(car)
+library(reshape2)
+library(broom)
+```
+
+```{r}
+hw5 <- read.csv("HW5.data.csv")
+```
+
+# Choosing predictors
+```{r}
+# Since the entire dataset is too big, I decided to first split the variables into smaller categories.
+
+# 1. Psychological (Social.support, Freedom.to.make.life.choices, Generosity, Perceptions.of.corruption)4
+
+# 2. Economic (Logged.GDP.per.capita, GDP, CPI, CPI.Change, Gasoline.Price, GDP, Out.of.pocket.health.expenditure, Tax.Revenue.Percent, Total.tax.rat, Unemployment.rate, Population.Labor.force.participation.Percent, Minimum.wage)12
+
+# 3. Heath and environment (Healthy.life.expectancy, Density.P.Km2, Agricultural.Land.Percent, Land.Area.Km2, Birth.Rate, Co2.Emissions, Fertility.Rate, Forested.Area.Percent, Infant.mortality, Life.expectancy, Maternal.mortality.ratio, Physicians.per.thousand)12
+
+# 4. Other (Armed.Forces.size, Gross.Primary.Education.Enrollment.Percent, Gross.Tertiary.Education.Enrollment.Percent, Official.language, Population)5
+
+psy_model <- regsubsets(happiness.score ~ Social.support + Freedom.to.make.life.choices + Generosity + Perceptions.of.corruption, data = hw5)
+
+summaryHH(psy_model)
+
+# top 2:  Social.support + Perceptions.of.corruption
+```
+
+```{r}
+econ_model <- regsubsets(happiness.score ~ Logged.GDP.per.capita + GDP + CPI + CPI.Change + Gasoline.Price + GDP + Out.of.pocket.health.expenditure + Tax.Revenue.Percent + Total.tax.rate + Unemployment.rate + Population.Labor.force.participation.Percent + Minimum.wage, data = hw5)
+
+summaryHH(econ_model)
+
+# top 2: Logged.GDP.per.capita + Unemployment.rate
+```
+
+```{r}
+env_model <- regsubsets(happiness.score ~ Healthy.life.expectancy + Density.P.Km2 + Agricultural.Land.Percent + Land.Area.Km2 + Birth.Rate + Co2.Emissions + Fertility.Rate + Forested.Area.Percent + Infant.mortality + Life.expectancy + Maternal.mortality.ratio + Physicians.per.thousand, data = hw5)
+
+summaryHH(env_model)
+
+# top 2: Healthy.life.expectancy + Physicians.per.thousand
+```
+
+```{r}
+other_model <- regsubsets(happiness.score ~ Armed.Forces.size + Gross.Primary.Education.Enrollment.Percent + Gross.Tertiary.Education.Enrollment.Percent + Population, data = hw5)
+
+summaryHH(other_model)
+
+# Top 2: Armed.Forces.size, Gross.Tertiary.Education.Enrollment.Percent
+
+# I took out Official.language because it is a categorical variable and does not work with regression
+```
+
+```{r}
+all_model <- regsubsets(happiness.score ~ Social.support + Freedom.to.make.life.choices + Generosity + Perceptions.of.corruption + Logged.GDP.per.capita + GDP + CPI + CPI.Change + Gasoline.Price + GDP + Out.of.pocket.health.expenditure + Tax.Revenue.Percent + Total.tax.rate + Unemployment.rate + Population.Labor.force.participation.Percent + Minimum.wage + Healthy.life.expectancy + Density.P.Km2 + Agricultural.Land.Percent + Land.Area.Km2 + Birth.Rate + Co2.Emissions + Fertility.Rate + Forested.Area.Percent + Infant.mortality + Life.expectancy + Maternal.mortality.ratio + Physicians.per.thousand + Armed.Forces.size + Gross.Primary.Education.Enrollment.Percent + Gross.Tertiary.Education.Enrollment.Percent + Population, data = hw5)
+
+summaryHH(all_model)
+
+# Best 8 predictor model: Social.support + Freedom.to.make.life.choices + Logged.GDP.per.capita + CPI + Minimum.wage + Fertility.Rate + Gross.Primary.Education.Enrollment.Percent + Gross.Tertiary.Education.Enrollment.Percent
+```
+
+# Fitting the models
+```{r}
+# Psychology 
+psy_pred_model <- lm(happiness.score ~ Social.support + Freedom.to.make.life.choices + Generosity + Perceptions.of.corruption, data = hw5)
+
+summary(psy_pred_model)
+
+# Significant: Social.support + Freedom.to.make.life.choices + Perceptions.of.corruption
+```
+
+```{r}
+# Econ
+econ_pred_model <- lm(happiness.score ~ Logged.GDP.per.capita + GDP + CPI + CPI.Change + Gasoline.Price + GDP + Out.of.pocket.health.expenditure + Tax.Revenue.Percent + Total.tax.rate + Unemployment.rate + Population.Labor.force.participation.Percent + Minimum.wage, data = hw5)
+
+summary(econ_pred_model)
+
+# Significant: Logged.GDP.per.capita.
+# Approaches significance: Unemployment.rate + Population.Labor.force.participation.Percent
+```
+
+```{r}
+# Env and health
+env_pred_model <- lm(happiness.score ~ Healthy.life.expectancy + Density.P.Km2 + Agricultural.Land.Percent + Land.Area.Km2 + Birth.Rate + Co2.Emissions + Fertility.Rate + Forested.Area.Percent + Infant.mortality + Life.expectancy + Maternal.mortality.ratio + Physicians.per.thousand, data = hw5)
+
+summary(env_pred_model)
+
+# Significant: Healthy.life.expectancy + Physicians.per.thousand 
+# Appraoches significance: Maternal.mortality.ratio 
+```
+
+```{r}
+# Other Model
+other_model <- lm(happiness.score ~ Armed.Forces.size + Gross.Primary.Education.Enrollment.Percent + Gross.Tertiary.Education.Enrollment.Percent + Population, data = hw5)
+
+summary(other_model)
+
+# Significant: Armed.Forces.size + Gross.Tertiary.Education.Enrollment.Percent + Population
+```
+
+```{r}
+all_predictors_model <- lm(happiness.score ~ Social.support + Freedom.to.make.life.choices + Logged.GDP.per.capita + CPI + Minimum.wage + Fertility.Rate + Gross.Primary.Education.Enrollment.Percent + Gross.Tertiary.Education.Enrollment.Percent, data = hw5)
+
+summary(all_predictors_model)
+
+# All significant except for CPI and Gross.Primary.Education.Enrollment.Percent. Gross.Primary.Education.Enrollment.Percent approaches significance.
+```
+
+# Checking conditions (all predictors model)
+
+## Continuous DV 
+```{r}
+summary(hw5$happiness.score)
+
+ggplot(hw5, aes(x=happiness.score))+ geom_histogram(color = "white")
+```
+
+## Linearity (scatterplot)
+```{r}
+model_df <- hw5 %>% 
+  dplyr::select(happiness.score, Social.support, Freedom.to.make.life.choices, Logged.GDP.per.capita, CPI, Minimum.wage, Fertility.Rate, Gross.Primary.Education.Enrollment.Percent, Gross.Tertiary.Education.Enrollment.Percent)
+
+model_df_long <- model_df %>% 
+  pivot_longer(cols = -c(happiness.score))
+
+ggplot(model_df_long, aes(value, happiness.score)) + 
+geom_point() + 
+facet_wrap(~ name, scales = "free_x")
+
+# I think CPI has some outliers and minimum.wage is also a little skewed, so I log-transformed both
+
+# filtering out outliers in CPI and removing 2 NA values
+CPI_Q1 <- quantile(model_df$CPI, .25, na.rm = T)
+CPI_Q3 <- quantile(model_df$CPI, .75, na.rm = T)
+CPI_IQR <- IQR(model_df$CPI, na.rm = T)
+
+# log transformation
+
+model_df <- model_df %>% 
+  mutate(log.CPI = log(CPI),
+         log.min.wage = log(Minimum.wage))
+
+model_df_long <- model_df %>% 
+  pivot_longer(cols = -c(happiness.score, CPI, Minimum.wage)) %>% 
+  dplyr::select(-c(CPI, Minimum.wage))
+
+ggplot(model_df_long, aes(value, happiness.score)) + 
+geom_point() + 
+facet_wrap(~ name, scales = "free_x")
+
+#Yay! Everything looks linear
+```
+
+```{r}
+# refititng our model
+new_all_predictors_model <- lm(happiness.score ~ Social.support + Freedom.to.make.life.choices + Logged.GDP.per.capita + log.CPI + log.min.wage + Fertility.Rate + Gross.Primary.Education.Enrollment.Percent + Gross.Tertiary.Education.Enrollment.Percent, data = model_df)
+
+summary(new_all_predictors_model)
+```
+
+## Check multi-colinearity
+```{r}
+vif(new_all_predictors_model)
+
+# everything is below 5, so we're good
+```
+
+## Homoscedasticity
+```{r}
+resid <- augment(new_all_predictors_model)
+
+ggplot(resid, aes(x=.fitted, y=.resid))+ geom_point()+geom_smooth()
+```
+
+## Normality
+```{r}
+ggplot(resid, aes(x=.resid))+ geom_histogram()
+```
+

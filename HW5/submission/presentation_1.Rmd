@@ -1,0 +1,51 @@
+---
+title: "Analyzing the Worlds Happiness"
+author: "Owen Gallagher, Jia Qi Lin, Jiacheng Wang"
+date: "`r Sys.Date()`"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(plotly)
+library(countrycode)
+
+#load in world data
+final.data <- read.csv('HW5.data.csv')
+final.data$iso.code <- countrycode(final.data$Country, "country.name", "iso3c")
+
+```
+
+## Guiding Question
+
+- What factors in a country lead to happiness? 
+- Our group decided to look at factors such as 
+  - Geography
+  - Economics 
+  - Health
+  
+## The Data
+
+- The happiness data was pulled from the World Happiness Report 2023 (Source)[https://worldhappiness.report/data/]
+- Additional country statistics were merged to the dataset from the following (Kaggle dataset)[https://www.kaggle.com/datasets/nelgiriyewithana/countries-of-the-world-2023]
+- Finally the `countrycode` package was used to import the continent and the iso country code
+- The dataset contains 133 countries
+  - Kosovo, Hong Kong, State of Palestine, Taiwan, and Palestine were dropped because from the dataset because the country statistics dataset did not have values for them
+  - The World Happiness Report did not survey every country in the world, so we **do not** have all countries
+
+## Map of Happiness
+
+```{r, out.width='100%'}
+plot_ly(data = final.data, type = 'choropleth', locations = ~iso.code, z = ~happiness.score, 
+        text = ~hover, colors = 'Spectral') %>%
+  colorbar(title = 'Happiness Score') %>%
+  layout(title = '2023 World Happiness Score for 133 Countries')
+```
+
+- The Western World appears to have the most happiness
+- In particular the Nordic Countries (Finland, Norway, Sweden, and Denmark) have the most happiness
+- African countries are the most unhappy, followed by countries in the middle east
+- Surprisingly Ukraine is not incredibly unhappy
+
+

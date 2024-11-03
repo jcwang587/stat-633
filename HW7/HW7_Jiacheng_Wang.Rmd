@@ -1,0 +1,232 @@
+---
+title: 'HW 7: Lecture 9'
+author: 'Name: Jiacheng Wang'
+output: 
+  html_document:
+    toc: TRUE
+number_sections: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+# Question 1
+
+Load the dataset listings.csv which includes information about AirBNB listings in Boston
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+listings <- read_csv("listings.csv")
+```
+
+# Question 2
+
+Load your mapbox token to the system
+
+```{r}
+Sys.setenv("MAPBOX_TOKEN" = "pk.eyJ1IjoiamN3YW5nNTg3IiwiYSI6ImNsdWtkNnprcTAydngyaWxsamFrcjg1NWQifQ.QWeeRhtZjVYJjD2f401m4g")
+```
+
+# Question 3
+
+Use some EDA tool/s to analyze the price variable (may or may not be graphical).
+
+Based on your observations, consider removing outliers.
+
+Please analyze carefully the outliers - are they random? do you think they represent errors?
+
+```{r}
+# Boxplot to identify outliers
+ggplot(listings, aes(y = price)) +
+  geom_boxplot() +
+  theme_minimal()
+```
+
+From the boxplot, we can see that there are some outliers in the price variable, which are pretty far from the rest of the data. These outliers with prices around $10,000 are likely errors, as they are significantly higher than the rest of the data. We will consider removing these outliers.
+
+```{r}
+print(nrow(listings))
+
+listings <- listings %>% filter(price <= 9500)
+
+print(nrow(listings))
+```
+
+
+# Question 4
+
+Create a plot that demonstrates the effect of neighborhood on price. Please transform the price variable with log base 10.
+
+```{r}
+listings <- listings %>% filter(price > 0)
+listings$log_price <- log10(listings$price)
+
+ggplot_obj <- ggplot(
+  listings, aes(x = neighbourhood, y = log_price)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(x = "Neighborhood", y = "Log-transformed Price (base 10)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+ggplot_obj
+```
+
+# Question 5
+
+Next, we move to organize the price data on a mapbox layer. Choose how visualize the price data. Consider which type of base layer best assists you in showing what you want to show. Add interesting information to the tooltip. Make sure that everything that is visible is also desirable.
+
+```{r, message=FALSE, warning=FALSE}
+library(plotly)
+
+mapbox_plot <- listings %>%
+  mutate(log_price = log10(price + 1)) %>%
+  plot_mapbox() %>%
+  add_markers(x = ~longitude,
+              y = ~latitude,
+              color = ~as.factor(neighbourhood),
+              text = ~paste0("The price is $", price, "<br>",
+                             "in ", neighbourhood, "<br>")) %>%
+  layout(
+    mapbox = list(
+      center = list(lat = 42.32, lon = -71.06),
+      zoom = 10
+      )
+    )
+mapbox_plot
+```
+
+# Question 6
+
+Use `subplot()` to combine the visualizations from 4 and 5 into a single plot. Place the plot from 4 on top and the one from 5 on bottom. Figure out how to fine-tune `subplot` so that you can see all the information you want to.
+
+```{r fig.width=8, fig.height=8.5, message=FALSE, warning=FALSE}
+boxplot_plotly <- ggplotly(ggplot_obj)
+
+combined_plot <- subplot(boxplot_plotly, mapbox_plot, nrows = 2, margin = 0.1, heights = c(0.4, 0.6))
+
+combined_plot %>% layout(height = 800)
+```
+
+# Question 7
+
+`GPX` is a popular format for storing GPS data. The file `mbta.gpx` (retrieved from http://erikdemaine.org/maps/mbta/) includes waypoints of all of the MBTA stations as well as routes of rapid transit lines: subway / light train (red, orange, blue and green lines), bus rapid transit (silver line) and commuter rail.
+
+The `read_GPX()` function from the `tmaptools` package reads `GPX` files into `sf` objects in `R`.
+
+```{r, message=FALSE, warning=FALSE}
+library(tmaptools)
+mbta <- read_GPX("mbta.gpx")
+```
+
+Add all subway / light rail stations and tracks to the plot (red, orange, blue and green lines).
+
+```{r, message=FALSE, warning=FALSE}
+library(sf)
+
+# Filter the tracks and add them to the map
+mapbox_tracks_plot <- mapbox_plot %>%
+  add_sf(data = filter(mbta$tracks, grepl("Red Line", name)), color = I("black"), name = "Red Line") %>%
+  add_sf(data = filter(mbta$tracks, grepl("Orange Line", name)), color = I("black"), name = "Orange Line") %>%
+  add_sf(data = filter(mbta$tracks, grepl("Blue Line", name)), color = I("black"), name = "Blue Line") %>%
+  add_sf(data = filter(mbta$tracks, grepl("Green Line", name)), color = I("black"), name = "Green Line")
+
+# Filter for stations related to the specified subway lines
+subway_lines = c("Red Line", "Orange Line", "Blue Line", "Green Line")
+subway_stations <- filter(mbta$waypoints, grepl(paste(subway_lines, collapse="|"), type))
+
+# Add the filtered stations to the map
+mapbox_tracks_plot <- mapbox_tracks_plot %>%
+  add_sf(data = subway_stations, color = I("black"), text = ~paste0(name), hoverinfo = "text", name = "Stations")
+
+mapbox_tracks_plot
+```
+
+# Question 8
+
+Have the track for each line appearing with the appropriate color (red, orange, green, blue) and with a legend entry that allows hiding/showing it (instead of a legend entry for all lines together). You can consider writing a function that will save you much typing.
+
+```{r, message=FALSE, warning=FALSE}
+library(sf)
+library(dplyr)
+library(plotly)
+
+# Filter the tracks and add them to the map
+mapbox_tracks_plot <- mapbox_plot %>%
+  add_sf(data = filter(mbta$tracks, grepl("Red Line", name)), color = I("red"), name = "Red Line") %>%
+  add_sf(data = filter(mbta$tracks, grepl("Orange Line", name)), color = I("orange"), name = "Orange Line") %>%
+  add_sf(data = filter(mbta$tracks, grepl("Blue Line", name)), color = I("blue"), name = "Blue Line") %>%
+  add_sf(data = filter(mbta$tracks, grepl("Green Line", name)), color = I("green"), name = "Green Line")
+
+# Filter for stations related to the specified subway lines
+subway_lines = c("Red Line", "Orange Line", "Blue Line", "Green Line")
+subway_stations <- filter(mbta$waypoints, grepl(paste(subway_lines, collapse="|"), type))
+
+# Add the filtered stations to the map
+mapbox_tracks_plot <- mapbox_tracks_plot %>%
+  add_sf(data = subway_stations, color = I("black"), text = ~paste0(name), hoverinfo = "text", name = "Stations")
+
+mapbox_tracks_plot
+```
+
+# Question 9
+
+`KML` is another popular format for storing GPS data. The `Boston_Neighborhoods.kml` file (downloaded from https://data.boston.gov/dataset/boston-neighborhoods on March 31st, 2021) contains the boundaries of all of Boston’s neighborhoods. You can read `KML` data into an `sf` object using the function `st_read()` from the `sf` package.
+
+```{r}
+boston_neighborhoods <- sf::st_read("Boston_Neighborhoods.kml")
+```
+
+Add the neighborhood boundaries to your map (with a legend entry that allows showing/hiding those).
+
+```{r, message=FALSE, warning=FALSE}
+mapbox_tracks_neighbor_plot <- mapbox_tracks_plot %>%
+  add_sf(
+    data = boston_neighborhoods,
+    split = ~Name, 
+    stroke = I("black"), span = I(1),
+    text = ~paste(Name), 
+    hoverinfo = "text"
+  ) 
+
+mapbox_tracks_neighbor_plot
+```
+
+# Question 10
+
+Organize the last plot with the plot from 4 in a meaningful way. You might need to tweak either so that all labels, titles etc. appear as you want them to.
+
+```{r fig.width=8, fig.height=8.5, message=FALSE, warning=FALSE}
+
+combined_plot <- subplot(boxplot_plotly, mapbox_tracks_neighbor_plot, nrows = 2, margin = 0.1, heights = c(0.4, 0.6))
+
+combined_plot %>% layout(height = 800)
+```
+
+# Question 11
+
+Compute the distance between each AirBnB listing and the nearest T-stop. Add this quantity to the tooltip (hover). Add this relationship to the visualization that ties neighborhood and price.
+
+```{r, message=FALSE, warning=FALSE}
+if (!inherits(listings, "sf")) {
+  listings <- st_as_sf(listings, coords = c("longitude", "latitude"), crs = 4326)
+}
+
+if (!inherits(subway_stations, "sf")) {
+  subway_stations <- st_as_sf(subway_stations, coords = c("longitude", "latitude"), crs = 4326)
+}
+
+# Compute the distance between each Airbnb listing and the nearest T-stop
+listings$distance_to_tstop <- st_distance(listings, subway_stations) %>% apply(1, min)
+listings <- mutate(listings, distance_to_tstop = units::set_units(distance_to_tstop, "m"))
+```
+
+
+
+
+
+
+
+

@@ -1,0 +1,289 @@
+---
+title: "2023 World Happiness Report"
+author: "Owen Gallagher, Nikki Lin, Jiacheng Wang"
+date: "2024-03-13"
+output: 
+  ioslides_presentation:
+    widescreen: yes
+    css: styles.css
+runtime: shiny # *****Please comment out this line to generate a static html*****
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Guiding Question
+- The World Happiness Report is a survey conducted in 137 countries
+  - The report uses the past 3 years in survey to assign score
+- What factors in a country lead to happiness? 
+- Our group decided to look at two factors
+  - Geography / Geopolitics
+  - Societal Factors
+    - Freedom of Choice
+    - Corruption Perception
+    - Social Support
+  
+  
+## The Data
+- The happiness data was pulled from the World Happiness Report 2023 
+[Source](https://worldhappiness.report/data/)
+
+- Additional country statistics were merged to the dataset from the following 
+[Kaggle dataset](https://www.kaggle.com/datasets/nelgiriyewithana/countries-of-the-world-2023)
+
+- Finally the `countrycode` package was used to import the continent and the 
+iso country code
+
+- The dataset contains 133 countries
+
+  - Kosovo, Hong Kong, State of Taiwan and Palestine were dropped because from 
+  the dataset because the country statistics dataset did not have values for them
+  
+  - The World Happiness Report did not survey every country in the world, so we 
+  **do not** have all countries
+
+
+## 2023 World Happiness Score for 133 Countries {.small-text}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(plotly)
+library(countrycode)
+
+final.data <- read.csv('HW5.data.csv')
+Country <- final.data$Country
+iso.code = countrycode::countrycode(Country, origin = 'country.name', 
+                                    destination = 'iso3c')
+final.data$hover <- with(final.data, paste(Country, '<br>', 
+                                           'Population (in millions):', 
+                                           round(Population / 1000000,2), 
+                                           '<br>', 
+                          'Life.expectancy: ', 
+                          Life.expectancy, 
+                          '<br>', 'GDP Per Cap: $', 
+                          round(exp(Logged.GDP.per.capita),0)))
+
+plot_ly(data = final.data, type = 'choropleth', 
+        locations = ~iso.code, z = ~happiness.score, 
+        text = ~hover, colors = 'Spectral') %>%
+  colorbar(title = 'Happiness Score')
+```
+
+- The Western World appears to have the most happiness
+- The Nordic Countries (Finland, Norway, Sweden, and Denmark) have the most happiness
+- African countries are the most unhappy, followed by countries in the middle east
+- Surprisingly Ukraine is not incredibly unhappy
+
+
+## Multiple Regression Predicting Happiness Score
+```{r, echo=F, results='asis', warning=FALSE, message=FALSE}
+library(readr)
+library(stargazer)
+library(tidyverse)
+library(broom)
+library(countrycode)
+library(plotly)
+library(patchwork)
+library(stargazer)
+hw5 <- read.csv("HW5.data.csv")
+
+psydata <- hw5 %>% 
+  dplyr::select(Country, happiness.score, Social.support, 
+                Freedom.to.make.life.choices, Perceptions.of.corruption) 
+
+psydata2 <- psydata %>% 
+    pivot_longer(c("Social.support", "Freedom.to.make.life.choices", 
+                   "Perceptions.of.corruption"), 
+                 names_to = "Predictor", values_to = "Score")
+
+psydata2$Continent <- countrycode(sourcevar = psydata2[["Country"]], 
+                                  origin = "country.name", 
+                                  destination = "continent")
+
+psy_pred_model2 <- lm(happiness.score ~ Social.support + 
+                        Freedom.to.make.life.choices + 
+                        Perceptions.of.corruption, data = hw5)
+
+stargazer(psy_pred_model2, header=F, type = "html", 
+          covariate.labels = c("Social support", 
+                               "Life choice freedom", 
+                               "Corruption perception",
+                               "Constant",
+          dep.var.labels   = ("Happiness score")))
+```
+
+
+## Psychological Factors of Happiness
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+plot2 <- ggplot(psydata2, aes(x = Score, y = happiness.score, 
+                              color = Predictor)) + 
+  geom_smooth(method='lm', aes(fill = Predictor), se = TRUE, alpha = 0.5) + 
+  scale_fill_manual(values=c(Freedom.to.make.life.choices="plum3",
+                             Perceptions.of.corruption="khaki1",
+                             Social.support= "mistyrose")) +
+    scale_color_manual(values=c(Freedom.to.make.life.choices="mediumpurple4",
+                             Perceptions.of.corruption="orange2",
+                             Social.support="palevioletred3")) + 
+  theme_bw() +
+  ylab("Happiness Score")
+
+plotly2 <- ggplotly(plot2, tooltip = c("text"))
+
+plotly2
+```
+
+
+## Psychological Trends across Continents
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+plot1 <- ggplot(psydata2, aes(Score, happiness.score, color = Continent)) + 
+  geom_point(aes(ids = Country), alpha = 0.5) +
+  theme(legend.title = element_blank()) +
+  facet_wrap(~Predictor, labeller = 
+               labeller(Predictor = 
+                          c("Freedom.to.make.life.choices" = 
+                              "Life Choice Freedom", 
+                            "Perceptions.of.corruption" = 
+                              "Corruption Perception",
+                            "Social.support" = 
+                              "Social Support"))) + 
+  geom_smooth(method='lm', se = F, alpha = 0.5) + 
+  theme_bw() + 
+  ylab("Happiness Score")
+
+plotly1 <- ggplotly(plot1)
+
+plotly1
+```
+
+
+<!--## Economic Plot with GDP and Happiness Score
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(plotly)
+
+# Data preparation and plot GDP with Happiness Score
+hw_data <- read.csv("HW5.data.csv", stringsAsFactors = TRUE)
+countries_all <- read.csv("region.csv", stringsAsFactors = TRUE)
+combined_data <- left_join(hw_data, countries_all, by = "Country")
+write.csv(combined_data, "HW5_with_region.csv")
+happiness2023 <- read.csv("HW5_with_region.csv", stringsAsFactors = TRUE)
+
+# Plot GDP with Happiness Score
+gg <- ggplot(happiness2023, aes(x = Logged.GDP.per.capita, 
+                                y = happiness.score, 
+                                color = Region)) + 
+  geom_point(aes(size = Population), show.legend = 'size') + 
+  scale_x_log10() + 
+  theme(legend.title = element_blank()) +
+  guides(color = guide_legend("Region"), size = FALSE)
+
+ggplotly(gg, tooltip = c("x", "y", "color", "size")) 
+```
+-->
+
+
+## Shiny APP
+```{r shiny, echo=FALSE, warning=FALSE, message=FALSE}
+library(shiny)
+library(markdown)
+library(ggplot2)
+library(dplyr)
+library(plotly)
+library(shinythemes)
+
+
+# Data preparation
+happiness2023 <- read.csv("HW5_with_region.csv", stringsAsFactors = TRUE)
+colnames <- colnames(happiness2023) %>% .[-c(1, 2, 3)] %>% .[-length(.)]
+
+# Define UI 
+ui <- navbarPage(
+  theme = shinytheme("journal"),
+  title = "World Happiness",
+  tabPanel("Plot",
+           sidebarPanel(
+             width = 3,
+             uiOutput("variable_1"),
+             uiOutput("variable_2"),
+             helpText("ctrl/shift for multiple choice"),
+             uiOutput("country"),
+             hr(),
+             span("Data source:", 
+                  tags$a("WHR 2023",
+                         href = "http://worldhappiness.report"))),
+           mainPanel(plotlyOutput("scatterplot"))),
+           
+  tabPanel("About", 
+           "Please check the same directory as this RMarkdown file for the data 
+           file and the R script used for this Shiny app."))
+
+
+# Define server 
+server <- function(input, output, session) {
+  
+  output$variable_1 <- renderUI({
+    selectInput("variable_1", "Y-variable:", 
+                choices = colnames, selected = "happiness.score")})
+  
+  output$variable_2 <- renderUI({
+    selectInput("variable_2", "X-variable:", 
+                choices = colnames, selected = "happiness.score")})
+
+  data_2023 <- reactiveValues(data = happiness2023)
+  
+  filtered_data <- reactive({
+    data_2023$data %>% 
+      filter(Country %in% c(input$country)) %>% 
+      arrange(Country)
+    })
+  
+  countries <- reactive({ 
+    df_small <- 
+      happiness2023 %>% 
+      select(Country) %>% 
+      droplevels()
+    c("Select All", levels(df_small$Country))
+    })
+  
+  output$country <- renderUI ({
+    selectInput("country", "Countries:", 
+                multiple = TRUE,
+                choices = countries(), 
+                selected = "Select All",
+                selectize = FALSE,
+                size = 10)
+  })
+
+  observe({
+    if ("Select All" %in% input$country) {
+      selected_choices <- setdiff(countries(), "Select All")
+      updateSelectInput(session, "country", selected = selected_choices)
+    }
+  })
+
+  output$scatterplot <- renderPlotly({
+    if (is.null(data_2023$data)) return()
+    
+    p <- ggplot(filtered_data()) +
+      geom_point(aes_string(x = input$variable_2, 
+                            y = input$variable_1, 
+                            colour = "Region", 
+                            label = "Country"), 
+                 size = 3) +
+      ggtitle(paste0(input$variable_1, " vs. ", input$variable_2))
+  })
+}
+
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+
+## Summary
+- Get the data from the World Happiness Report 2023.
+- Make a world map plot to visualize the happiness score.
+- Analyze the relationship between the happiness score and psychological factors.
+- Create a Shiny app to visualize the relationship between the happiness score and other variables.

@@ -1,0 +1,348 @@
+---
+title: 'HW 6: Lecture 6, 7'
+author: 'Name: Jiacheng Wang'
+output: 
+  html_document:
+    toc: TRUE
+number_sections: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+# Question 1
+
+Comparing distributions may be done with multiple quantile/ECDF plots overlaid.
+
+Read the singers data from Cleveland.
+
+```{r}
+suppressMessages(library(tidyverse))
+singer <- readRDS("Cleveland_singer.rds")
+```
+
+**1. Make a quantile plot (compute those manually according to the instructions in p. 21) for the heights of the first bass singers.**
+Overlay a boxplot for the heights of the first bass singers on top of the quantile plot, and add segments (whose heights are based on boxplot.stats) and full points in green/blue/red (whose heights are based on linear interpolation of the f-values–heights. For linear interpolation, you can use the approx function) as is demonstrated in the following plot (the plot was generated with base-R graphics, you may use ggplot or plotly according to your preferences).
+
+```{r}
+# Subset the data for first bass singers
+first_bass <- singer %>%
+  filter(voice.part == "Bass 1") %>%
+  pull(height)
+
+# Compute the boxplot stats for the segments
+stats <- boxplot.stats(first_bass)
+
+# Compute the quantiles for the plot
+n <- length(first_bass)
+f_values <- (1:n - 0.5) / n
+height_quantiles <- approx(f_values, sort(first_bass), xout = f_values)$y
+
+# Create a data frame for ggplot
+plot_data <- data.frame(f_values = f_values, height = sort(first_bass))
+
+# Create the plot
+ggplot(plot_data, aes(x = 0.5, y = height)) +
+  geom_boxplot(width = 0.4, color = "grey") + 
+  stat_boxplot(geom = "errorbar", width = 0.2, color = "grey") +
+  geom_point(aes(x = f_values), shape = 1, size = 2, stroke = 0.7) +
+  annotate("segment", x = 0, xend = 1, y = stats$stats[2], yend = stats$stats[2], color = "darkgreen", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0.25, xend = 0.25, y = stats$stats[1], yend = stats$stats[2], color = "darkgreen", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0, xend = 1, y = stats$stats[3], yend = stats$stats[3], color = "blue", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0.5, xend = 0.5, y = stats$stats[1], yend = stats$stats[3], color = "blue", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0, xend = 1, y = stats$stats[4], yend = stats$stats[4], color = "red", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0.75, xend = 0.75, y = stats$stats[1], yend = stats$stats[4], color = "red", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0, xend = 1, y = stats$stats[1], yend = stats$stats[1], color = "grey", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0, xend = 1, y = stats$stats[5], yend = stats$stats[5], color = "grey", linetype = "dotted", linewidth = 0.55) +
+  annotate("point", x = 0.25, y = stats$stats[2], color = "darkgreen", size = 2) +
+  annotate("point", x = 0.5, y = stats$stats[3], color = "blue", size = 2) +
+  annotate("point", x = 0.75, y = stats$stats[4], color = "red", size = 2) +
+  labs(title = "Quantile- and Box-Plots for Bass 1", y = "Height", x = "f-values") +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold")
+  ) + 
+  scale_y_continuous(breaks = stats$stats[1:5])
+```
+
+**Extra credit - if you try to generate the above plot for the first soprano, first alto or first tenor, something will be off. Explain exactly what goes wrong**
+
+```{r}
+# Subset the data for first soprano singers
+first_soprano <- singer %>%
+  filter(voice.part == "Soprano 1") %>%
+  pull(height)
+
+# Compute the boxplot stats for the segments
+stats <- boxplot.stats(first_soprano)
+
+# Compute the quantiles for the plot
+n <- length(first_soprano)
+f_values <- (1:n - 0.5) / n
+height_quantiles <- approx(f_values, sort(first_soprano), xout = f_values)$y
+
+# Create a data frame for ggplot
+plot_data <- data.frame(f_values = f_values, height = sort(first_soprano))
+
+# Create the plot
+ggplot(plot_data, aes(x = 0.5, y = height)) +
+  geom_boxplot(width = 0.4, color = "grey") + 
+  stat_boxplot(geom = "errorbar", width = 0.2, color = "grey") +
+  geom_point(aes(x = f_values), shape = 1, size = 2, stroke = 0.7) +
+  annotate("segment", x = 0, xend = 1, y = stats$stats[2], yend = stats$stats[2], color = "darkgreen", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0.25, xend = 0.25, y = stats$stats[1], yend = stats$stats[2], color = "darkgreen", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0, xend = 1, y = stats$stats[3], yend = stats$stats[3], color = "blue", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0.5, xend = 0.5, y = stats$stats[1], yend = stats$stats[3], color = "blue", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0, xend = 1, y = stats$stats[4], yend = stats$stats[4], color = "red", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0.75, xend = 0.75, y = stats$stats[1], yend = stats$stats[4], color = "red", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0, xend = 1, y = stats$stats[1], yend = stats$stats[1], color = "grey", linetype = "dotted", linewidth = 0.55) +
+  annotate("segment", x = 0, xend = 1, y = stats$stats[5], yend = stats$stats[5], color = "grey", linetype = "dotted", linewidth = 0.55) +
+  annotate("point", x = 0.25, y = stats$stats[2], color = "darkgreen", size = 2) +
+  annotate("point", x = 0.5, y = stats$stats[3], color = "blue", size = 2) +
+  annotate("point", x = 0.75, y = stats$stats[4], color = "red", size = 2) +
+  labs(title = "Quantile- and Box-Plots for Soprano 1", y = "Height", x = "f-values") +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold")
+  ) +
+  scale_y_continuous(breaks = stats$stats[1:5])
+```
+
+The problem with the plot for the first soprano singers is that the green, and blue points that represent the median, and upper quartile respectively, should align with the edges and the band inside the box of the boxplot. However, they do not. 
+
+The problem with the plot is that it uses a simple method to estimate the quartiles that doesn't work well if the data isn't spread out evenly. This can give misleading information if there are a lot of data points bunched up in one place or if there are some extreme outliers.
+
+**2. No matter how narrow the bin width you set, you will not get a histogram where all bars are of height 1 (as we’ve seen happen in the lecture). Why is this happening? For a very narrow bin width, what is the connection between the histogram and the quantile plot? Demonstrate your argument with a plot that overlays the two.**
+
+The reason why we will not get a histogram where all bars are of height 1, even with a very narrow bin width, is due to the nature of continuous data. In a histogram, each bin represents the frequency of data points within a specific range. When the bin width is very narrow, each bin may contain few or even just one data point, but the height of the bar (when not normalized to density) represents the count of data points within that bin, not the probability density. Therefore, the height of each bar in a histogram reflects the number of data points in that range, and not all bars will have a height of 1 unless every bin contains exactly one data point, which is extremely unlikely with continuous data.
+
+The connection between a very narrow bin width histogram and the quantile plot is that both are ways to visualize the distribution of the data. As bin width decreases, the histogram begins to approximate the shape of the data's distribution, resembling the detail provided by a quantile plot. A quantile plot, shows the exact percentile of each data point, which is what a histogram with extremely narrow bins attempts to achieve.
+
+To demonstrate this argument, I created a plot incorporating a histogram with very narrow bins and a quantile plot. This will show how the histogram becomes more similar to the quantile plot as the bin width decreases, highlighting the connection between the two visualization methods.
+
+```{r}
+set.seed(0)
+data <- rnorm(1000)
+
+# Compute quantiles for the data
+sorted_data <- sort(data)
+f_values <- seq(1, length(data)) / length(data)
+
+# Create a histogram with very narrow bins
+bin_width <- (max(data) - min(data)) / 1000 # Very narrow bin width
+bin_edges <- seq(min(data), max(data), by = bin_width)
+hist_data <- hist(data, breaks = bin_edges, plot = FALSE)
+
+# Create the overlay plot
+plot(sorted_data, f_values, type = "l", xlab = "Data Value", 
+     ylab = "Normalized Frequency / Quantile", 
+     main = "Overlay of Histogram (with narrow bins) and Quantile Plot",
+     col = "blue", ylim = c(0, 1))
+lines(hist_data$mids, hist_data$density / max(hist_data$density), type = "s", col = "red")
+
+# set the ylimits to be 0 to 1
+plot.window(xlim = c(min(data), max(data)), ylim = c(0, 1), xaxt = "n", yaxt = "n")
+legend("topleft", legend = c("Quantile Plot", "Histogram (narrow bins)"), 
+       col = c("blue", "red"), lty = c(1, 1), bty = "n")
+```
+
+**3. Building on the latter, exemplify in words and plot the connection between the histogram and quantile plot of the first bass heights.**
+
+```{r}
+set.seed(0)
+
+# Compute quantiles for the first bass heights
+sorted_data <- sort(first_bass)
+f_values <- seq(1, length(sorted_data)) / length(sorted_data)
+
+# Create a histogram with very narrow bins for first bass heights
+bin_width <- (max(first_bass) - min(first_bass)) / length(first_bass) # Very narrow bin width
+bin_edges <- seq(min(first_bass), max(first_bass), by = bin_width)
+hist_data <- hist(first_bass, breaks = bin_edges, plot = FALSE)
+
+# Create the overlay plot
+plot(sorted_data, f_values, type = "l", xlab = "Height (inches)", 
+     ylab = "Cumulative Frequency (Quantile)", 
+     main = "Histogram and Quantile Plot of First Bass Singer Heights",
+     col = "blue", ylim = c(0, 1), las = 1)
+
+# Overlay the histogram using lines with step mode 's'
+lines(hist_data$mids, hist_data$density / max(hist_data$density), type = "s", col = "red")
+
+# Add legend
+legend("topleft", legend = c("Quantile Plot", "Histogram (narrow bins)"), 
+       col = c("blue", "red"), lty = c(1, 1), bty = "n")
+
+```
+
+**4. Cleveland Ch. 2 recommends comparing pairs of distributions with QQ plots (p. 21-22) and plotting pairwise QQ plots (p. 24)**
+
+Implement manually the QQ plot for the comparison of two distributions from p. 21 of Cleveland. In addition, when the number of observations is large, Cleveland suggests in p. 21 to create the plot with fewer quantiles than the number of observations. In your implementation, in addition to full data from two distributions, accept a vector of qunatiles to perform the comparison on (say {0.01,0.03,...,0.97,0.99}).
+
+Both the full and manually selected quantiles implementations require linear interpolation. You may utilize the approx() function for this end.
+
+```{r}
+second_distribution <- rnorm(length(first_bass))
+
+# Sort both distributions
+sorted_first_bass <- sort(first_bass)
+sorted_second_dist <- sort(second_distribution)
+
+# Full data QQ plot
+f_values_full <- seq(1, length(sorted_first_bass)) / (length(sorted_first_bass) + 1)
+quantiles_first_full <- approx(f_values_full, sorted_first_bass, xout = f_values_full)$y
+quantiles_second_full <- approx(f_values_full, sorted_second_dist, xout = f_values_full)$y
+
+# QQ plot for manually selected quantiles
+selected_quantiles <- seq(0.01, 0.99, by = 0.02)
+quantiles_first_selected <- approx(f_values_full, sorted_first_bass, xout = selected_quantiles)$y
+quantiles_second_selected <- approx(f_values_full, sorted_second_dist, xout = selected_quantiles)$y
+
+# Plotting the full data QQ plot
+plot(quantiles_first_full, quantiles_second_full, xlab = "First Distribution Quantiles",
+     ylab = "Second Distribution Quantiles", main = "Full Data QQ Plot")
+abline(0, 1, col = "red") # Line y=x for reference
+
+# Plotting the selected quantiles QQ plot
+plot(quantiles_first_selected, quantiles_second_selected, xlab = "First Distribution Selected Quantiles",
+     ylab = "Second Distribution Selected Quantiles", main = "Selected Quantiles QQ Plot")
+abline(0, 1, col = "red") # Line y=x for reference
+```
+  
+**5. In class we saw how to utilize segments and symbols in order to generate a dumbbell plot.**
+
+It may be interesting to add another dimension to the plot by mapping another variable to the segments colors.
+
+Modify the above code so that the variable class is mapped to the segments’ color.
+
+```{r fig.width=8, fig.height=9}
+suppressMessages(library(plotly))
+
+mpg %>%
+  group_by(model, class) %>%
+  summarise(c = mean(cty), h = mean(hwy), .groups = 'drop') %>%
+  mutate(model = forcats::fct_reorder(model, c)) %>%
+  plot_ly(height = 800) %>%
+  add_segments(
+    x = ~c, y = ~model,
+    xend = ~h, yend = ~model,
+    color = ~class,
+    showlegend = TRUE  
+  ) %>%
+  add_markers(
+    x = ~c, y = ~model,
+    color = ~class,
+    name = ~class, 
+    showlegend = FALSE, 
+    marker = list(size = 5, symbol = "square")
+  ) %>%
+  add_markers(
+    x = ~h, y = ~model,
+    color = ~class,
+    name = ~class,
+    showlegend = FALSE, 
+    marker = list(size = 5, symbol = "diamond")
+  ) %>%
+  layout(
+    xaxis = list(title = "Miles per gallon"),
+    yaxis = list(title = "model"),
+    legend = list(title = list(), y = 0.5)
+  )
+```
+
+**6. The above plot exposes a problem with our original visualization. What is the problem? Fix it.**
+```{r}
+# combine the altima compact and midsize classes into one class
+mpg$class <- ifelse(mpg$class %in% c("compact", "midsize"), "compact/midsize", mpg$class)
+
+# continue to plot the dumbbell plot
+mpg %>%
+  group_by(model, class) %>%
+  summarise(c = mean(cty), h = mean(hwy), .groups = 'drop') %>%
+  mutate(model = forcats::fct_reorder(model, c)) %>%
+  plot_ly(height = 800) %>%
+  add_segments(
+    x = ~c, y = ~model,
+    xend = ~h, yend = ~model,
+    color = ~class,
+    showlegend = TRUE  
+  ) %>%
+  add_markers(
+    x = ~c, y = ~model,
+    color = ~class,
+    name = ~class,
+    showlegend = FALSE,
+    marker = list(size = 5, symbol = "square")
+  ) %>%
+  add_markers(
+    x = ~h, y = ~model,
+    color = ~class,
+    name = ~class,
+    showlegend = FALSE,
+    marker = list(size = 5, symbol = "diamond")
+  ) %>%
+  layout(
+    xaxis = list(title = "Miles per gallon"),
+    yaxis = list(title = "model"),
+    legend = list(title = list(), y = 0.5)
+  )
+```
+
+# Extra Credit
+We saw in class that we can add paths according to the ordering of a variable in order to add it to a scatter plot that shows two other variables.
+
+So, starting from the following code:
+
+```{r}
+suppressMessages(library(plotly))
+
+economics %>%
+  arrange(date) %>%
+  plot_ly(x = ~unemploy, y = ~psavert, text = ~date)
+
+```
+
+Find out how to get to the plot below. 
+
+```{r}
+suppressMessages(library(plotly))
+suppressMessages(library(dplyr))
+library(scales)  
+
+numeric_jul_1967 <- as.numeric(ymd("1967-07-01"))
+numeric_jan_1975 <- as.numeric(ymd("1975-01-01"))
+numeric_jan_1985 <- as.numeric(ymd("1985-01-01"))
+numeric_jan_1995 <- as.numeric(ymd("1995-01-01"))
+numeric_jan_2005 <- as.numeric(ymd("2005-01-01"))
+numeric_apr_2015 <- as.numeric(ymd("2015-04-01"))
+
+economics %>%
+  arrange(date) %>%
+  mutate(time_numeric = as.numeric(date)) %>%
+  plot_ly(x = ~unemploy, 
+          y = ~psavert, 
+          text = ~date, 
+          type = 'scatter', mode = 'markers',
+          color = ~time_numeric, 
+          colors = colorRamp(c("purple", "red", "yellow")) ) %>%
+  add_paths(x = ~unemploy, y = ~psavert, 
+            color = ~time_numeric, 
+            colors = colorRamp(c("purple", "red", "yellow")),
+            showlegend = FALSE) %>%
+  layout(xaxis = list(title = "Number of Unemplyed (thousands)"),
+         yaxis = list(title = "Personal Savings Rate")) %>% 
+  colorbar(title = "Date", 
+          tickvals = c(numeric_jul_1967, numeric_jan_1975, numeric_jan_1985, numeric_jan_1995, numeric_jan_2005, numeric_apr_2015),
+          ticktext = c("Jul 1967", "Jan 1975", "Jan 1985", "Jan 1995", "Jan 2005", "Apr 2015"))
+
+
+```
+
+

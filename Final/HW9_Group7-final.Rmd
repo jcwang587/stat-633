@@ -1,0 +1,116 @@
+---
+title: "Is the age of electric vehicles coming?"
+author: "Kuanjung Huang, Jiacheng Wang, Ping Yang"
+date: "2024-05-15"
+output: 
+  ioslides_presentation:
+    widescreen: yes
+#runtime: shiny
+---
+
+
+```{r setup, include=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(dplyr)
+library(RColorBrewer)
+library(plotly)
+library(reshape2)
+```
+
+
+## Guiding Questions
+- Whether the fuel price is a key factor in the development of electric vehicles?
+- How do fuel taxes affect the sales of hybrid electric vehicles?
+- What are the trends in hybrid electric vehicle sales by different manufacturers?
+
+
+## Data
+- [Average Retail Fuel Prices in the United States](https://afdc.energy.gov/fuels/prices.html)
+
+- [Fuel Taxes by Country](https://www.compareyourcountry.org/taxing-energy?cr=oecd&lg=en&page=2&visited=1)
+
+- [U.S. HEV Sales by Model](https://afdc.energy.gov/data/10301)
+
+<!-- Jiacheng's Slides -->
+## Average Retail Fuel Prices in the United States
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+fuel_prices <- read.csv("gasoline_prices_by_year.csv")
+plot_ly(fuel_prices, x = ~Year, 
+        y = ~Gasoline_Price, 
+        type = 'scatter', 
+        mode = 'lines+markers', 
+        name = 'Gasoline Price ($/gallon)', 
+        marker = list()) %>%
+  add_trace(y = ~Gasoline_Price_2023, 
+            name = 'Gasoline Price (2023 $/gallon)', 
+            marker = list()) %>%
+  layout(xaxis = list(title = 'Year'),
+         yaxis = list(title = 'Gasoline Price ($/gallon)'),
+         width = 1000)
+```
+<span style="font-size: 0.7em;">
+**Inflation-adjusted gasoline prices** were calculated based on: $P_{2023} = P \times Inflation factor$.
+</span>
+
+## Fuel Taxes by Country
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+fuel_tax <- read.csv("fuel_taxes_by_country.csv")
+ordered_countries <- fuel_tax$Country[order(-fuel_tax$Gasoline)]
+plot_ly(fuel_tax, x = ~Country, y = ~Gasoline, type = 'bar', name = 'Gasoline') %>%
+  add_trace(y = ~Diesel, name = 'Diesel') %>%
+  layout(
+    xaxis = list(
+      title = 'Country',
+      tickangle = -45,
+      tickfont = list(size = 13),
+      automargin = TRUE,
+      type = 'category',
+      categoryorder = 'array',
+      categoryarray = ~ordered_countries
+    ),
+    yaxis = list(title = 'Fuel Tax ($/gallon)'),
+    barmode = 'group',
+    width = 1000
+  )
+```
+
+<!-- Ping's Slides -->
+## U.S. HEV Sales by Model
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data <- readxl::read_excel("hev_sale.xlsx")
+hev_sales_long <- melt(data, id.vars = "Vehicle", variable.name = "year", value.name = "sales")
+total_sales <- hev_sales_long %>%
+  group_by(Vehicle) %>%
+  summarise(total_sales = sum(sales))
+hev_sales_long <- merge(hev_sales_long, total_sales, by = "Vehicle")
+hev_sales_long$Vehicle <- factor(hev_sales_long$Vehicle, levels = total_sales$Vehicle[order(total_sales$total_sales, decreasing = FALSE)])
+num_models <- length(unique(hev_sales_long$Vehicle))
+custom_palette <- colorRampPalette(brewer.pal(8, "Set3"))(num_models)
+
+hev_sales_long %>%
+  plot_ly() %>%
+  add_bars(
+    x = ~year, 
+    y = ~sales, 
+    color = ~Vehicle, 
+    colors = custom_palette, 
+    text = ~paste("Year: ", year, "<br>Model: ", Vehicle, "<br>Sales: ", sales, "<br>Total Sales: ", total_sales), 
+    hoverinfo = "text"
+    ) %>%
+  layout(
+    xaxis = list(title = "Year"),
+    yaxis = list(title = "Sales"),
+    barmode = "stack",
+    showlegend = FALSE
+  )
+```
+
+## Summary
+- Retrieve data from DOE Alternative Fuels Data Center.
+- **Line chart** - Trend of alternative and traditional motor fuel prices from 2000 to 2024.
+- **Bar chart** - Comparison of gasoline and diesel taxes in different countries.
+- **Stacked bar chart** - Trend of sales by hybrid electric vehicle (HEV) model, 1999-2019.
+- **Shiny APP** - 
+
+

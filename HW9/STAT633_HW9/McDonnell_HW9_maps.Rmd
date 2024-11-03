@@ -1,0 +1,177 @@
+---
+title: "McDonnell_Project2"
+author: "Paul McDonnell"
+date: "2024-04-19"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load required libraries
+library(plotly)
+library(tidyverse)
+library(dplyr)
+library(RColorBrewer)
+library(sf)
+library(tmaptools)
+library(tmap)
+```
+
+```{r, echo=FALSE}
+# Set filepath
+setwd("/Users/paulm/OneDrive/Desktop/UMass_PhD/PhD_Yr2/Spring 24/STAT 633/Group Project 2/OneDrive") 
+```
+
+```{r, warning=FALSE}
+# LOad mapbox token
+Sys.setenv("MAPBOX_TOKEN" = "pk.eyJ1IjoicG1jZG9ubmVsbCIsImEiOiJjbHV1NXMyeXgwNmU5Mm1wNmVpNXJuZHV5In0.9Re3QXfhIw5NpkLsF-gr1Q")
+```
+
+```{r}
+# Load files
+data <- read.csv("shinkansen_stations_geocoded.csv")
+tracks <- st_read("Japan - Shinkansen Lines.kml")
+```
+
+```{r}
+
+#Define each line from "tracks"
+tohoku_line <- tracks[tracks$Name == "Tohoku Shinkansen", ]
+akita_line <- tracks[tracks$Name == "Akita Shinkansen", ]
+yamagata_line <- tracks[tracks$Name == "Yamagata Shinkansen", ]
+joetsu_line <- tracks[tracks$Name == "Joetsu Shinkansen", ]
+tokaido_line <- tracks[tracks$Name == "Tokaido Shinkansen", ]
+sanyo_line <- tracks[tracks$Name == "Sanyo Shinkansen", ]
+kyushu_line <- tracks[tracks$Name == "Kyushu Shinkansen", ]
+nagano_line <- tracks[tracks$Name == "Nagano Shinkansen", ]
+
+#Create map plot
+plot2 <-  plot_mapbox() %>%
+          add_markers(data = data, x = ~lon, y = ~lat, color = ~Company, hoverinfo = "text",
+                      text = ~paste0("<b>Station_Name:", Station_Name,"<br><b>Company: </b>", 
+                      Company, "<br><b>Year: </b>", Year)) %>%
+          add_sf(data = tohoku_line, color = I("orange"), name = "Tohoku Line", inherit = FALSE) %>%
+          add_sf(data = akita_line, color = I("red"), name = "Akita Line", inherit = FALSE) %>%
+          add_sf(data = yamagata_line, color = I("gold"), name = "Yamagata Line", inherit = FALSE) %>%
+          add_sf(data = joetsu_line , color = I("plum"), name = "Joetsu Line", inherit = FALSE) %>%
+          add_sf(data = tokaido_line, color = I("turquoise"), name = "Tokaido Line", inherit = FALSE) %>%
+          add_sf(data = sanyo_line, color = I("green"), name = "Sanyo Line", inherit = FALSE) %>%
+          add_sf(data = kyushu_line, color = I("purple"), name = "Kyushu Line", inherit = FALSE) %>%
+          add_sf(data = nagano_line, color = I("pink"), name = "Nagano Line", inherit = FALSE) %>%
+          layout(title = "The Shinkansen System",
+               xaxis = list(title = ""),
+               yaxis = list(title = ""),
+               margin = list(l = 25, r = 25, b = 25, t = 50),
+               font = list(family = "Arial", color = "black"),
+               mapbox = list(style = "mapbox://styles/mapbox/light-v10",
+                             accesstoken = Sys.getenv("MAPBOX_TOKEN"),
+                             center = list(lon = 138.849, lat = 36.3),
+                             zoom = 5))
+plot2
+```
+
+```{r}
+#Attempting to create an interactive plot to show the expansion of the Shinkansen System 
+
+# Sort the unique years
+years <- sort(unique(data$Year))
+
+# Set data$Company as a factor variable
+data$Company <- as.factor(data$Company)
+
+# Create a color palette with colors for each company
+color_palette <- brewer.pal(length(levels(data$Company)), "Set2")
+
+# Map the company levels to the color palette
+company_colors <- setNames(color_palette, levels(data$Company))
+
+# Create a list of frames for the animation
+frames <- lapply(years, function(year) {
+  frame_data <- data %>% filter(Year <= year)
+  list(
+    data = list(
+      list(
+        type = 'scattermapbox',
+        lon = frame_data$lon,
+        lat = frame_data$lat,
+        text = frame_data$Station_Name,
+        mode = 'markers',
+        marker = list(size = 6, color = company_colors[frame_data$Company]),
+        showlegend = FALSE  # Set showlegend to FALSE to prevent duplicate legends
+      )
+    ),
+    name = as.character(year)
+  )
+})
+
+# Define the initial frame (the first year)
+initial_year <- min(years)
+initial_data <- data %>% filter(Year <= initial_year)
+
+# Create the base plot
+plot2 <- plot_mapbox() %>%
+  layout(
+    title = "Expansion of the Shinkansen System",
+    mapbox = list(
+      style = "mapbox://styles/mapbox/light-v10",
+      accesstoken = Sys.getenv("MAPBOX_TOKEN"),
+      center = list(lon = 138.849, lat = 36.3),
+      zoom = 5
+    ),
+    legend = list(orientation = 'v', y = 1, x = 1, traceorder = 'normal')
+  )
+
+# Add the initial data to the plot with showlegend set to FALSE
+plot2 <- plot2 %>%
+  add_trace(
+    data = initial_data,
+    type = 'scattermapbox',
+    lon = ~lon,
+    lat = ~lat,
+    text = ~Station_Name,
+    mode = 'markers',
+    marker = list(size = 6, color = company_colors[initial_data$Company]),
+    showlegend = FALSE  # Ensure the initial trace does not create a legend entry
+  )
+
+# Manually add a trace for each company for the legend
+for (company in levels(data$Company)) {
+  plot2 <- plot2 %>%
+    add_trace(
+      type = 'scattermapbox',
+      lon = NA,  # Not actually plotting points, so we can use NA
+      lat = NA,
+      mode = 'markers',
+      marker = list(size = 10, color = company_colors[company]),
+      name = company,
+      showlegend = TRUE  # Only these traces should add to the legend
+    )
+}
+
+# Add the frames to the plot
+plot2$x$frames <- frames
+
+# Add animation controls and sliders
+plot2 <- plot2 %>%
+  layout(
+    sliders = list(
+      list(
+        active = 0,
+        steps = lapply(years, function(y) {
+          list(
+            method = "animate",
+            args = list(list(y), list(mode = "immediate", frame = list(duration = 300))),
+            label = y
+          )
+        }),
+        x = 0.1,
+        len = 0.9,
+        xanchor = "left",
+        yanchor = "top"
+      )
+    )
+  )
+
+# Show the plot
+plot2
+```

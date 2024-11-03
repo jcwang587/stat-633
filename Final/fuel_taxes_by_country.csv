@@ -1,0 +1,58 @@
+Order,Country,Gasoline,Diesel
+1,United Kingdom,3.49,3.39
+2,Netherlands,3.35,2.05
+3,Turkey,3.33,2.24
+4,Italy,3.18,2.62
+5,Israel,3.04,2.84
+6,Switzerland,2.99,3.02
+7,Finland,2.98,2.15
+8,Greece,2.93,1.40
+9,Germany,2.86,2.00
+10,Norway,2.84,2.11
+11,Sweden,2.73,2.29
+12,France,2.73,1.99
+13,Portugal,2.69,1.71
+14,Belgium,2.69,1.77
+15,Denmark,2.65,1.75
+16,Ireland,2.57,2.03
+17,Korea,2.56,1.79
+18,Slovenia,2.38,1.83
+19,Iceland,2.26,2.45
+20,Austria,2.25,1.80
+21,Slovak Republic,2.25,1.56
+22,Czech Republic,2.06,1.70
+23,Luxembourg,2.02,1.42
+24,Spain,1.99,1.41
+25,Estonia,1.85,1.67
+26,New Zealand,1.82,0.01
+27,Japan,1.81,1.10
+28,Latvia,1.80,1.41
+29,Poland,1.74,1.48
+30,Hungary,1.74,1.56
+31,Argentina,1.70,1.17
+32,Chile,1.57,0.39
+33,South Africa,1.30,1.19
+34,Australia,1.14,0.92
+35,India,1.05,0.60
+36,China,0.98,0.74
+37,Mexico,0.76,0.99
+38,Canada,0.30,0.12
+39,United States,0.19,0.25
+40,Brazil,0.12,0.06
+41,Indonesia,0.11,0.10
+42,Russia,0.00,0.00
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+Notes: ,,,
+"In the United States, states and local entities add substantial taxes and fees on top of the federal taxes shown above. On average, these taxes and fees are greater than the federal tax (eia.gov/tools/faqs/faq.php?id=10&t=10) ",,,
+Data for all countries based on tax rates in 2015. The average USD to Euro conversion rate in 2015 was 1.11004:1.,,,
+"Gasoline and diesel conversion factors used are 8,887 grams of CO2 emissions per gallon of gasoline consumed and 10,180 grams of CO2 emissions per gallon of diesel consumed, respectively.",,,
+,,,
+Worksheet available at afdc.energy.gov/afdc/data/,,,
+Last Updated 03/5/2019,,,

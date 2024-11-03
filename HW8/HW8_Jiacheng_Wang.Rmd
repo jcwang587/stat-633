@@ -1,0 +1,271 @@
+---
+title: 'HW 8: Lecture 10'
+author: 'Name: Jiacheng Wang'
+output: 
+  html_document:
+    toc: TRUE
+number_sections: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+# Question 1
+
+*Recall the airport locations and flights data from the lecture on maps:*
+
+```{r, message=FALSE, warning=FALSE}
+suppressMessages(library(plotly))
+# Airport locations:
+air <- readRDS("HW8_airport_locations.rds")
+# Flight paths
+flights <- readRDS("HW8_flights.rds")
+
+# Map projection:
+geo <- 
+  list(
+    projection = list(
+      type = 'orthographic',
+      rotation = list(lon = -100, lat = 40, roll = 0)
+    ),
+    showland = TRUE,
+    landcolor = toRGB("gray95")
+  )
+
+plot_geo(color = I("red")) %>%
+  add_segments(
+    data = flights,
+    x = ~start_lon,
+    xend = ~end_lon,
+    y = ~start_lat,
+    yend = ~end_lat,
+    alpha = 0.3,
+    size = I(1)
+  ) %>%
+  add_markers(
+    data = air,
+    x = ~long,
+    y = ~lat,
+    size = ~cnt,
+    alpha = 0.5
+  ) %>%
+  layout(geo = geo, showlegend = FALSE)
+```
+
+*Use `plotly` to create a graph representation of flight data network.*
+
+*1. If you try to convert the two data frames to a graph object, a problem will be revealed. What is it? Fix it by adding some values to one or both of the dataframes.*
+
+The problem is that there are missing airports in the airport data frame `air`, which are present in the flights data frame.
+
+```{r}
+unique_flights_airports <- unique(c(flights$airport1, flights$airport2))
+missing_airports <- setdiff(unique_flights_airports, air$iata)
+missing_airports
+```
+
+We can fix this by adding the missing airports to the `air` data frame and assigning NA values to the other columns.
+
+```{r}
+num_missing <- length(missing_airports)
+air[(nrow(air) + 1):(nrow(air) + num_missing), 1] <- missing_airports
+
+air[(nrow(air) - num_missing + 1):nrow(air), 2:7] <- NA
+air[(nrow(air) - num_missing + 1):nrow(air), 8] <- 0
+air[(nrow(air) - num_missing + 1):nrow(air), 'country'] <- 'USA'
+
+# Check if the new rows are added
+tail(air, num_missing)
+```
+
+
+*2. Set the color of a node according to its centrality.*
+
+*Comment on the layout you chose to employ and your selection of a centrality measure. What do you find it easier to see in the graph representation compared to the geographical representation?*
+
+```{r, message=FALSE, warning=FALSE}
+library(igraph)
+library(tibble)
+library(dplyr)
+
+nodes <- data.frame(id = air$iata)
+links <- data.frame(id1 = flights$airport1, id2 = flights$airport2)
+
+net <- graph_from_data_frame(d = links, vertices = nodes, directed = TRUE)
+
+l <- layout_with_kk(net)
+colnames(l) <- c("x", "y")
+nodes_w_layout <- tibble(id = nodes$id, x = l[,1], y = l[,2])
+
+# Calculate the centrality for node color mapping
+centrality <- degree(net)
+centrality <- log(centrality + 1)
+nodes_w_layout <- nodes_w_layout %>%
+  mutate(centrality = centrality[match(id, names(centrality))])
+
+plotly_network <- plot_ly() %>%
+  add_markers(
+    data = nodes_w_layout,
+    x = ~x, 
+    y = ~y,
+    text = ~id,
+    marker = list(
+      size = 10,
+      color = ~centrality,
+      colorscale = 'Viridis',
+      showscale = TRUE
+    ),
+    hoverinfo = 'text'
+  )
+
+links_with_positions <- links %>%
+  left_join(nodes_w_layout, by = c("id1" = "id")) %>%
+  rename(xstart = x, ystart = y) %>%
+  left_join(nodes_w_layout, by = c("id2" = "id")) %>%
+  rename(xend = x, yend = y)
+
+plotly_network <- plotly_network %>%
+  add_segments(
+    data = links_with_positions,
+    x = ~xstart, y = ~ystart,
+    xend = ~xend, yend = ~yend,
+    line = list(color = 'rgba(100, 100, 100, 0.2)')
+  )
+
+plotly_network <- plotly_network %>%
+  layout(
+    title = "Graph Representation of Flight Data Network",
+    xaxis = list(zeroline = FALSE, showticklabels = FALSE, showgrid = FALSE, title = ""),
+    yaxis = list(zeroline = FALSE, showticklabels = FALSE, showgrid = FALSE, title = ""),
+    showlegend = FALSE
+  )
+
+plotly_network
+```
+
+I chose the Kamada-Kawai layout for the graph representation. This layout is based on the spring-electrical model and is suitable for small to medium-sized graphs. Compared to the geographical representation, the graph representation makes it easier to see the relationships between airports. Besides, the graph representation allows us to see the connections between airports more clearly, and the centrality measure helps us identify the most important airports in the network.
+
+
+# Question 2
+
+*Create a nice representation of the UKFaculty graph using visNetwork. For fun, add random names from babynames to each node and have those reflected in the tooltip.*
+
+```{r, message=FALSE, warning=FALSE}
+library(igraphdata)
+library(visNetwork)
+library(babynames)
+
+data("UKfaculty")
+
+vg <- toVisNetworkData(UKfaculty, idToLabel = FALSE)
+head(vg$nodes)
+head(vg$edges)
+
+set.seed(697)
+bb <- babynames::babynames
+random_names <- sample(bb$name, vcount(UKfaculty), replace = TRUE)
+vg$nodes$label <- random_names
+```
+
+*The network is given as a directed and weighted network. Please consider these attributes when visualizing the network. You can consider ignoring these attributes with the analytical functions you utilize.*
+
+*Experiment with a dynamic layout (`?visPhysics`) vs. `igrpah` layouts (`?visIgraphLayout`). Provide the best of each according to your judgment, and explain why you prefer those to other layouts.*
+
+```{r}
+# visNetwork layout
+visNetwork(nodes = vg$nodes, edges = vg$edges) %>%
+  visPhysics(stabilization = FALSE)
+```
+
+
+```{r}
+layout <- layout_with_kk(UKfaculty) 
+vg$nodes$x <- layout[, 1]
+vg$nodes$y <- layout[, 2]
+
+edges_df <- igraph::as_data_frame(UKfaculty, what = "edges")
+nodes_df <- as_tibble(vg$nodes[, c("id", "x", "y", "label")])
+
+edge_positions <- edges_df %>%
+  left_join(nodes_df, by = c("from" = "id")) %>%
+  rename(x = x, y = y) %>%
+  left_join(nodes_df, by = c("to" = "id"), suffix = c("", "end"))
+
+plot_ly() %>%
+  add_markers(
+    data = nodes_df,
+    x = ~x, 
+    y = ~y,
+    text = ~label,
+    marker = list(size = 10),
+    hoverinfo = 'text'
+  ) %>%
+  add_segments(
+    data = edge_positions,
+    x = ~x, y = ~y,
+    xend = ~xend, yend = ~yend,
+    line = list(color = 'rgba(100, 100, 100, 0.2)')
+  ) %>%
+  layout(
+    xaxis = list(zeroline = FALSE, showticklabels = FALSE, showgrid = FALSE, title = ""),
+    yaxis = list(zeroline = FALSE, showticklabels = FALSE, showgrid = FALSE, title = ""),
+    showlegend = FALSE
+  )
+```
+
+I prefer the igraph layout over the visNetwork layout because the igraph layout provides a more compact and organized representation of the network. The igraph layout is based on the Kamada-Kawai algorithm. The visNetwork layout, on the other hand, is more dynamic and interactive but may not be as suitable for large graphs. In this case, the igraph layout provides a clearer representation of the network structure, making it easier to see the relationships between nodes.
+
+*Try some community detection algorithms from igraph with it. Provide a visual comparison of the results of the best community detection algorithm and the worst community detection algorithm with the actual groups the providers of the data set identified (the Group attribute of the vertices).*
+
+```{r}
+library(igraph)
+
+UKfaculty_igraph <- graph_from_data_frame(vg$edges, directed=TRUE, vertices=vg$nodes)
+UKfaculty_undirected <- as.undirected(UKfaculty_igraph, mode = "mutual")
+
+# Louvain method
+comm_louvain <- cluster_louvain(UKfaculty_undirected)
+membership_louvain <- membership(comm_louvain)
+
+# Fast Greedy method
+comm_fastgreedy <- cluster_fast_greedy(UKfaculty_undirected)
+membership_fastgreedy <- membership(comm_fastgreedy)
+
+vg$nodes$community_louvain <- as.factor(membership_louvain[vg$nodes$id])
+vg$nodes$community_fastgreedy <- as.factor(membership_fastgreedy[vg$nodes$id])
+vg$nodes$actual_group <- V(UKfaculty_undirected)$Group
+
+# Plot with actual groups
+plot_actual <- visNetwork(nodes = vg$nodes, edges = vg$edges) %>%
+  visNodes(color = list()) %>%
+  visEdges(arrows = 'to') %>%
+  visIgraphLayout(layout = "layout_with_kk") %>%
+  visGroups(groupname = "Group", value = list()) %>%
+  visOptions(highlightNearest = list())
+
+# Plot with Louvain community detection
+plot_louvain <- visNetwork(nodes = vg$nodes, edges = vg$edges) %>%
+  visNodes(color = list()) %>%
+  visEdges(arrows = 'to') %>%
+  visIgraphLayout(layout = "layout_with_kk") %>%
+  visGroups(groupname = "Louvain", value = list()) %>%
+  visOptions(highlightNearest = list(), selectedBy = "community_louvain")
+
+# Plot with Fast Greedy community detection
+plot3_fast <- visNetwork(nodes = vg$nodes, edges = vg$edges) %>%
+  visNodes() %>%
+  visEdges(arrows = 'to') %>%
+  visIgraphLayout(layout = "layout_with_kk") %>%
+  visGroups(groupname = "Fast Greedy", value = list()) %>%
+  visOptions(highlightNearest = list(), selectedBy = "community_fastgreedy")
+
+plot_actual
+plot_louvain
+plot3_fast
+```
+
+From the visual comparison, we can see that the Louvain method provides a better community detection result. There is one community 8 from the fast greedy method includes only one node, which is not a meaningful community. The Louvain method, on the other hand, provides more meaningful communities.
+

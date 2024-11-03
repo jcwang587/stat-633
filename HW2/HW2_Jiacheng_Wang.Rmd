@@ -1,0 +1,296 @@
+---
+title: 'HW 2: Introduction, dplyr, tidyr'
+author: 'Name: Jiacheng Wang'
+output: 
+  html_document:
+    toc: TRUE
+number_sections: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+# Question 1
+
+Recreate the animated gapminder plot for the full set of years.
+
+First, use the following to read the three following data into R:
+
+```{r}
+gdp_per_cap <- 
+  read.csv(
+    "income_per_person_gdppercapita_ppp_inflation_adjusted.csv", 
+    header = TRUE, 
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+    )
+life_exp <- 
+  read.csv(
+    "life_expectancy_years.csv",
+    header = TRUE,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+    )
+pop <-
+  read.csv(
+    "population_total.csv",
+    header = TRUE,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+```
+
+Create a single tidy dataframe that includes all the data you need to recreate the plot for all the years up to and including 2020. The structure of your data should be similar to that of the `gapminder` dataset that is provided in the `gapminder` package:
+
+```{r}
+data(gapminder, package = "gapminder")
+head(gapminder)
+```
+
+```{r message=FALSE}
+library(tidyr)
+library(dplyr)
+library(countrycode)
+
+# Reshape gdp_per_cap
+gdp_long <- pivot_longer(gdp_per_cap, cols = -country, names_to = "year", values_to = "gdp_per_cap")
+
+# Reshape life_exp
+life_exp_long <- pivot_longer(life_exp, cols = -country, names_to = "year", values_to = "life_expectancy")
+
+# Reshape pop
+pop_long <- pivot_longer(pop, cols = -country, names_to = "year", values_to = "population")
+```
+
+```{r}
+# Merge datasets
+data_combined <- gdp_long %>%
+  inner_join(life_exp_long, by = c("country", "year")) %>%
+  inner_join(pop_long, by = c("country", "year"))
+```
+
+```{r}
+# Convert year to numeric
+data_combined$year <- as.numeric(data_combined$year)
+
+# Ensure country names are character
+data_combined$country <- as.character(data_combined$country)
+
+# Standardize country names
+data_combined$country <- countrycode(data_combined$country, "country.name", "iso3c")
+```
+
+```{r}
+# Filter for years up to and including 2020
+data_final <- filter(data_combined, year <= 2020)
+
+print(data_final)
+```
+
+Use the code from the introductory presentation to generate the animated plot for the entire period.
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+library(plotly)
+
+gg <- 
+  ggplot(data_final, aes(gdp_per_cap, life_expectancy)) +
+    geom_point(aes(size = population, frame = year, ids = country)) +
+    scale_x_log10() + 
+    theme(legend.title = element_blank())
+
+ggplotly(gg)
+```
+
+
+# Question 2
+
+Compile a single tidy data frame from the two tables `table1.xlsx` and `table2.xlsx` for some monthly historical data downloaded from the U.S. Bureau of Labor Statistics (and slightly modified, somewhat nefariously, by the instructor). The data are provided as Excel sheets. You may use Excel to delete the first 11 lines of the sheets, but do not manipulate the data in any other way with Excel. Read the files into R using the `read_xlsx()` function from the `readxl` package. 
+
+```{r message=FALSE}
+library(readxl)
+library(tidyverse)
+
+table1 <- read_xlsx("table1_11.xlsx")
+table2 <- read_xlsx("table2_11.xlsx")
+
+head(table1)
+head(table2)
+```
+
+Use `pivot_longer`, `pivot_wider` and `join` operations wisely.
+
+```{r}
+# Pivot both tables to long format
+table1_long <- table1 %>%
+  pivot_longer(cols = Jan:Dec, names_to = "Month", values_to = "CPI", values_drop_na = TRUE) %>%
+  select(-`HALF1/HALF2`) # Assuming we're excluding the HALF1/HALF2 column for now
+
+table2_long <- table2 %>%
+  pivot_longer(cols = Jan:Dec, names_to = "Month", values_to = "Unemployment Rate", values_drop_na = TRUE) %>%
+  select(-Annual) # Assuming we're excluding the Annual column for now
+
+# Join the tables on Year and Month
+combined_data <- left_join(table1_long, table2_long, by = c("Year", "Month"))
+
+head(combined_data)
+```
+
+**Which variables will you include? Which will you not? why?** 
+
+I will include the `Year` and `Month` variables. These columns are the core data needed for most analyses, representing the monthly data points across years for two different metrics. I will not include the `HALF1/HALF2` and `Annual` columns. These columns represent summaries or aggregates that can be recalculated from the monthly data if needed. Including them in the tidy data may lead to redundancy and potentially complicate analyses that focus on monthly trends.
+
+**How will you deal with NA values?**
+
+I will use the `values_drop_na = TRUE` argument in the `pivot_longer` function to remove NA values from the long format tables. This will ensure that the final tidy data frame does not contain NA values, which can be problematic for many analyses.
+
+**Comment about any peculiarities that you identify in the data.**
+
+1. Presence of `NA` Values: `table2` shows an `NA` value for September 1953, which indicates missing data. 
+
+2. Zero Values in 1961: `table2` shows zero values for the entire year of 1961, which seems unusual and could indicate data entry errors or an anomaly in the data collection process.
+
+3. Negative Values in 1977: A negative value (-7.2) appears for April 1977 in `table2`, which is likely a data entry error, as negative unemployment rates are not feasible.
+
+4. High Unemployment Rate Spike in 2020: There's a significant spike in the unemployment rate in April 2020 in `table2`, jumping to 14.7%. This outlier may reflect the impact of the COVID-19 pandemic on employment.
+
+**Which sanity checks can you devise to verify that your tidy table is correct (an important yet not exhaustive hint: `group_by`)? What do you conclude from these sanity checks?**
+
+1. Check for completeness of months and years, so that we can ensure every year has all months represented, accounting for any expected missing values
+
+```{r}
+completeness_check <- combined_data %>%
+  group_by(Year) %>%
+  summarise(Months_count = n_distinct(Month)) %>%
+  filter(Months_count != 12)
+print(completeness_check)
+```
+
+This result is expected and indicates that the data cleaning and merging processes were successful in maintaining a complete set of monthly records for each year.
+
+2. Verify range of CPI and unemployment rate, ensuring they fall within reasonable bounds.
+
+```{r}
+summary_check <- combined_data %>%
+  summarise(Min_CPI = min(CPI, na.rm = TRUE),
+            Max_CPI = max(CPI, na.rm = TRUE),
+            Min_Unemployment = min(`Unemployment Rate`, na.rm = TRUE),
+            Max_Unemployment = max(`Unemployment Rate`, na.rm = TRUE))
+print(summary_check)
+```
+
+A minimum CPI of 21.5 and a maximum of 280, which suggests a wide range of Consumer Price Index values. The minimum value seems reasonable for historical data, assuming the dataset starts from a period when CPI values were generally lower. The maximum value suggests the dataset extends into more recent years when inflation has significantly increased CPI values.
+
+The minimum unemployment rate is reported as -7.2, and the maximum is 14.7. The maximum unemployment rate is plausible, especially considering economic crises that could lead to higher unemployment rates. However, the minimum value of -7.2 is not feasible, as unemployment rates cannot be negative. 
+
+3. Check for negative or zero values in CPI and unemployment rate, which may not be feasible.
+
+```{r}
+anomaly_check <- combined_data %>%
+  filter(CPI <= 0 | `Unemployment Rate` <= 0)
+print(anomaly_check)
+```
+
+Unemployment rates of 0 for all months of 1961 are highly unlikely and suggest a data reporting error. The negative unemployment rate for April 1977 is also an error, as mentioned earlier.
+
+**Do not type manually years or months. Find a way to create vectors that include these values from the raw data (consider `rownames`, `colnames`).**
+
+```{r}
+years_vector <- unique(table1$Year)
+months_vector <- colnames(table1)[2:13] 
+
+years_vector
+months_vector
+```
+
+# Question 3
+
+Read Cleveland’s Chapter 2, Sections 2.1-2.2.
+
+The data referred to in these sections can be found in the attached file `Cleveland_singer.rds` that can be read into R using `readRDS`:
+
+```{r}
+singer <- readRDS("Cleveland_singer.rds")
+```
+
+Please answer the following:
+
+- Compare Fig. 1.2 and Fig. 2.1.
+  - What do you learn from Fig. 1.2?
+    - The distribution of heights within each voice part category, including the most common height ranges.
+    - The central tendency (mode) for each group is indicated by the tallest bar within each histogram.
+    - The spread or variability of heights within each voice part, as well as any potential outliers.
+  - What do you learn from Fig. 2.1?
+    - The exact heights of individual singers within each voice part, as each point represents one singer.
+    - The distribution is more granular, and clustering of data points at specific heights is evident.
+    - The spread of the data can also be observed, as well as the median height, which would be the value at the 0.5 f-value.
+  - Are there any insights you found in 1.2 that were harder to gather from 2.1?
+    - The exact frequency of each height interval is not as clear in the quantile plots.
+    - It is harder to see the most common height range in the quantile plots because they do not aggregate data into bins.
+  - Are there any insights you found in 2.1 that were harder to gather from 1.2?
+    - Individual data points and their exact heights are not shown in the histograms.
+    - The quantile plots make it easier to see the overall range (min to max) without the grouping effect of bins.
+
+- Cleveland uses the terms interpolation and extrapolation without explaining those explicitly. Explain those!
+  - Interpolation: This is the estimation of values within an existing range of data points. In the context of quantile plots, interpolation involves estimating quantile values within the range of observed data points. 
+  - Extrapolation: This is the estimation of values outside the existing range of data points. In the context of quantile plots, extrapolation involves estimating quantile values beyond the range of observed data points. 
+
+- When should interpolated and extrapolated quantile values be used?
+  - Interpolation is appropriate when the data is densely sampled and exhibits a consistent pattern, suggesting that the trend between known points is stable. This makes it suitable for filling in missing data within the range or estimating values when data points are close together and follow a predictable path. 
+
+  - Extrapolation is used to estimate values outside the range of observed data and is inherently more speculative. It should be applied when making predictions or forecasts beyond the existing data set, under the assumption that the established trend continues.
+
+- Based on the signers data, invent a question that would necessitate using interpolated values to answer it.
+  - "Given the height data for the singers in each voice part, what is the estimated height at the 75th percentile for Tenor 2 singers?"
+  
+- Based on the signers data, invent a question that would necessitate using extrapolated values to answer it.
+  - "If the trend in height distribution for singers continues, what would be the estimated height at the 90th percentile for Tenor 1 singers?"
+
+
+# Question 4
+
+Tidy the `anscombe` dataset. 
+
+Step 1: Combine the four datasets into a single table and add a column for the dataset identifier.
+
+```{r}
+library(tidyverse)
+
+data("anscombe")
+head(anscombe)
+
+anscombe_long <- pivot_longer(anscombe, 
+                              cols = everything(), 
+                              names_to = c(".value", "dataset"), 
+                              names_pattern = "(.)(.)") %>%
+  mutate(dataset = case_when(
+    dataset == "1" ~ "I",
+    dataset == "2" ~ "II",
+    dataset == "3" ~ "III",
+    dataset == "4" ~ "IV"
+  ))
+```
+
+Step 2: Convert the dataset identifiers to categorical factors for easier analysis.
+
+```{r}
+anscombe_long <- anscombe_long %>%
+  mutate(dataset = as.factor(dataset))
+```
+
+Step 3: Ensure data types are consistent: `x` and `y` as numeric and `Dataset` as categorical.
+
+```{r}
+anscombe_long <- anscombe_long %>%
+  mutate(x = as.numeric(x), y = as.numeric(y))
+head(anscombe_long)
+```
+
+Step 4: Check any missing or duplicate data points.
+
+```{r}
+sum(is.na(anscombe_long))
+sum(duplicated(anscombe_long))
+```

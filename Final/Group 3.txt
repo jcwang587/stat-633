@@ -1,0 +1,34 @@
+Group 5
+The variables introduction is very detailed and nice. The correlation matrix looks very pretty and interesting. The slide for transformation is very informative. The shiny app is very cool and informative.
+
+
+Group 1
+Well structured questions. Slide with table presentation is a bit difficult to follow during the presentation. Overall very good, I like the color styling in the slides.
+
+
+Group 3
+Interesting topic and apply many different visualization methodologies. The shiny app looks nice and is very informative. Good time control.
+
+
+Group 2
+Very detailed about data processing and main variables which is very nice. Some layout could be better arranged to fill the white space. The introduction for the shiny app is very cool. The presentation is overtime.
+
+
+Group 4
+The background introduction is very detailed and very clear. The map looks interesting but the hoover information is a bit too long. Many visualization methods were applied well. The scatter plot on slide 10 is a bit difficult to understand. 
+
+
+Group 6
+Very detailed and nice introduction of the data source introduction. I feel it could be better to using a bar plot on slide 7. The topic is very interesting to me to know those adoption statistics.
+
+
+Group 8
+The introduction for the dataset is very clear and well-structured. The shiny app with map plot looks very nice and the selection function is useful.
+
+
+Group 9
+Applied several different visualization tool and the result is direct to see. The color style of the shiny app looks very nice and functions are very interesting. 
+
+
+Group 7
+The shiny app is direct to understand and using. The color style is also very nice. The map plot is very informative and clear for comparison.

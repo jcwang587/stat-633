@@ -1,0 +1,112 @@
+---
+title: "HW9-Group presentation"
+author: "Minsu Kim"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+library(stringr)
+```
+
+## Data
+```{r}
+data <- read.csv("01_data_cleaning/shinkansen_stations_geocoded.csv")
+```
+
+## Analysis of operating companies
+
+Count the number of Shinkansen_Line operated by each company.
+Note: There are 7 intersection stations, and we count the number of Shinkansen_Line twice for the intersection stations. 
+For this, we split the string in the `Shinkansen_Line` column when it has both Shinkansen line names and unnest the data.
+
+```{r}
+dat <- data %>%
+  mutate(Line_name = strsplit(Shinkansen_Line, ",")) %>%
+  tidyr::unnest(Line_name) %>%
+  select(-Shinkansen_Line) %>%
+  rename(Shinkansen_Line = Line_name)
+dat$Shinkansen_Line <- gsub("-", "_", dat$Shinkansen_Line)
+dat$Shinkansen_Line <- gsub("Shinknsen", "Shinkansen", dat$Shinkansen_Line)
+```
+
+```{r}
+cnt_by_company <- dat %>%
+  count(Company, Shinkansen_Line) %>%
+  group_by(Company) %>%
+  mutate(total_n = sum(n)) %>%
+  ungroup()
+
+annotations <- list()
+for (i in 1:length(unique(cnt_by_company$Company))) {
+  annotations[[i]] <- list(
+    x = unique(cnt_by_company$Company)[[i]],
+    y = unique(cnt_by_company$total_n)[[i]],
+    text = unique(cnt_by_company$total_n)[[i]],
+    yanchor = "bottom",
+    showarrow = FALSE
+  )
+}
+
+cnt_by_company %>%
+  plot_ly(
+    x = ~Company,
+    y = ~n,
+    color = ~Shinkansen_Line,
+    colors = "Spectral",
+    hoverinfo = "text",
+    text = ~ paste(n, "stations in", Shinkansen_Line)
+  ) %>%
+  add_bars() %>%
+  layout(
+    barmode = "stack",
+    xaxis = list(title = "Company"),
+    yaxis = list(title = "Number of Shinkansen Line"),
+    title = "Number of Shinkansen Line by Company",
+    annotations = annotations
+  )
+```
+
+
+## Summary of the Distance from Tokyo Station
+
+```{r}
+colramp <- colorRamp(c("darkblue", "forestgreen", "red", "darkred", "orange"))
+boxp_company <- dat %>%
+  plot_ly(
+    y = ~Distance.from.Tokyo.st,
+    color = ~Company,
+    colors = colramp,
+    type = "box",
+    showlegend = FALSE
+  ) %>%
+  layout(
+    xaxis = list(title = "Company"),
+    title = "Boxplots of Distance from Tokyo Station by Company"
+  )
+```
+
+```{r}
+boxp_line <- dat %>%
+  mutate(Line = str_replace_all(Shinkansen_Line, "_Shinkansen", "")) %>%
+  plot_ly(
+    y = ~Distance.from.Tokyo.st,
+    color = ~Line,
+    type = "box",
+    showlegend = FALSE
+  ) %>%
+  layout(
+    xaxis = list(title = "Shinkansen Line"),
+    title = "Boxplots of Distance from Tokyo Station by Shinkansen Line"
+  )
+```
+
+```{r}
+subplot(boxp_company, boxp_line, nrows = 1, titleX = TRUE, margin = 0.03) %>%
+  layout(
+    title = "Boxplots of Distance from Tokyo Station by Company and Shinkansen Line",
+    plot_bgcolor = "#e5ecf6"
+  )
+```

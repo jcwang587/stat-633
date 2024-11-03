@@ -1,0 +1,10 @@
+/* styles.css */
+
+.no-title-slide .slide-header {
+  display: none;
+}
+
+.small-text {
+  font-size: 0.8em;
+  margin-top: -10px;
+}

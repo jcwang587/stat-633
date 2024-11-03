@@ -1,0 +1,18 @@
+Group 6: The crime types figure on page 5 looks interesting! The fonts is bit too crowded in x axis on page 7. The overall sturcture of the presentation is well organized time is a bit too long.
+
+Group 8: The format for the first page is a bit mess. A bit too many words for several introduction pages The time is bit too long. The shiny app looks interesting! The reference is listed in the end is very good and clear.
+
+Group 3: The initial background introduction slides are very clear. Maybe too many details on the variable and codings. The interactive map plot looks interesting!
+
+Group 9: The background slides including the datasourece and variables are very helpful and clear. The size of the scatter on page 9 could be smaller for better visualization. This shiny app with maps looks really cool and have so many functions!
+
+Group 5: Very interesting topic and research questions. The color style looks nice to me. The analysis is ovearll very meaning to select for study. The time control is very good.
+
+Group 2: Interesting topic but the research question could be expanded more from your project. The data cleaning and manipulation part is very clear and well explained. There are many visualizations from different perspective inculded in the presentation.
+
+Group 4: The data source and introduction is listed in very good details and clear. The first visualization on page 6 with the different scatter shape is not very clear to see, may choose more distinct shape of the scatter points. The shiny app is very cool.
+
+Group 7: The usage with google API is very cool to retrieve data. The visualization methodology including map plot, box plot and network plot is so comprehensive covering the class and very informative. The time control is overall good.
+
+Group 1: The overall visualization way looks simple but very clear. The color style is clear and looks pretty to me.
+

@@ -1,0 +1,309 @@
+---
+title: "Shinkansen Station"
+author: "Minsu Kim, Paul McDonnell, Jiacheng Wang"
+date: "2024-04-24"
+output: 
+  ioslides_presentation:
+    widescreen: yes
+    css: styles.css
+runtime: shiny
+---
+
+```{r setup, include=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(dplyr)
+library(geosphere)
+library(igraph)
+library(RColorBrewer)
+library(plotly)
+library(sf)
+library(stringr)
+library(tidyverse)
+library(tmaptools)
+library(tmap)
+
+Sys.setenv("MAPBOX_TOKEN" = "pk.eyJ1IjoicG1jZG9ubmVsbCIsImEiOiJjbHV1NXMyeXgwNmU5Mm1wNmVpNXJuZHV5In0.9Re3QXfhIw5NpkLsF-gr1Q")
+
+data <- read.csv("shinkansen_stations_geocoded.csv")
+tracks <- st_read("Japan - Shinkansen Lines.kml")
+```
+
+
+## Guiding Question
+
+- What are the characteristics of Shinkansen stations in Japan?
+- What are the preferences of operating companies regarding Shinkansen lines and distances from Tokyo Station?
+- How are Shinkansen stations distributed geographically across Japan?
+- What is the relationship between the year of opening and the distance from Tokyo Station?
+  
+## The Data
+
+- The data for the 113 Shinkansen stations was retrieved from a Kaggle dataset (https://www.kaggle.com/datasets/japandata509/shinkansen-stations-in-japan/data).
+- Location information was added throgh Google API using the `geocode` function from the `ggmap` package, achieving 97 successful matches.
+- 8 locations were matched and added from the Japan Cities Database at simplemaps.com (https://simplemaps.com/data/jp-cities).
+- 8 locations were manually hardcoded.
+
+<!-- Minsu's Slides -->
+## Operating Companies - Number of Stations
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+dat <- data %>%
+  mutate(Line_name = strsplit(Shinkansen_Line, ",")) %>%
+  tidyr::unnest(Line_name) %>%
+  select(-Shinkansen_Line) %>%
+  rename(Shinkansen_Line = Line_name)
+dat$Shinkansen_Line <- gsub("-", "_", dat$Shinkansen_Line)
+dat$Shinkansen_Line <- gsub("Shinknsen", "Shinkansen", dat$Shinkansen_Line)
+cnt_by_company <- dat %>%
+  count(Company, Shinkansen_Line) %>%
+  group_by(Company) %>%
+  mutate(total_n = sum(n)) %>%
+  ungroup()
+annotations <- list()
+for (i in 1:length(unique(cnt_by_company$Company))) {
+  annotations[[i]] <- list(
+    x = unique(cnt_by_company$Company)[[i]],
+    y = unique(cnt_by_company$total_n)[[i]],
+    text = unique(cnt_by_company$total_n)[[i]],
+    yanchor = "bottom",
+    showarrow = FALSE
+  )
+}
+cnt_by_company %>%
+  plot_ly(
+    x = ~Company,
+    y = ~n,
+    color = ~Shinkansen_Line,
+    colors = "Spectral",
+    hoverinfo = "text",
+    text = ~ paste(n, "stations in", Shinkansen_Line)
+  ) %>%
+  add_bars() %>%
+  layout(
+    barmode = "stack",
+    xaxis = list(title = "Company"),
+    yaxis = list(title = "Number of Shinkansen Line"),
+    title = "Number of Shinkansen Line by Company",
+    annotations = annotations
+  )
+```
+<span style="font-size: 0.65em;">
+Note: There are 7 intersection stations, and we count the number of `Shinkansen_Line` twice for the intersection stations. 
+For this, we split the string in the `Shinkansen_Line` column when it has both Shinkansen line names and unnest the data.
+</span>
+
+## Operating Companies - Distance
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+colramp <- colorRamp(c("darkblue", "forestgreen", "red", "darkred", "orange"))
+boxp_company <- dat %>%
+  plot_ly(
+    y = ~Distance.from.Tokyo.st,
+    color = ~Company,
+    colors = colramp,
+    type = "box",
+    showlegend = FALSE
+  ) %>%
+  layout(
+    xaxis = list(title = "Company"),
+    title = "Boxplots of Distance from Tokyo Station by Company"
+  )
+boxp_line <- dat %>%
+  mutate(Line = str_replace_all(Shinkansen_Line, "_Shinkansen", "")) %>%
+  plot_ly(
+    y = ~Distance.from.Tokyo.st,
+    color = ~Line,
+    type = "box",
+    showlegend = FALSE
+  ) %>%
+  layout(
+    xaxis = list(title = "Shinkansen Line"),
+    title = "Boxplots of Distance from Tokyo Station by Shinkansen Line"
+  )
+subplot(boxp_company, boxp_line, nrows = 1, titleX = TRUE, margin = 0.03) %>%
+  layout(
+    title = 
+      "Boxplots of Distance from Tokyo Station by Company and Shinkansen Line",
+    plot_bgcolor = "#e5ecf6"
+    )
+```
+
+
+<!-- Paul's Slides -->
+## Map of Shinkansen Stations
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+tohoku_line <- tracks[tracks$Name == "Tohoku Shinkansen", ]
+akita_line <- tracks[tracks$Name == "Akita Shinkansen", ]
+yamagata_line <- tracks[tracks$Name == "Yamagata Shinkansen", ]
+joetsu_line <- tracks[tracks$Name == "Joetsu Shinkansen", ]
+tokaido_line <- tracks[tracks$Name == "Tokaido Shinkansen", ]
+sanyo_line <- tracks[tracks$Name == "Sanyo Shinkansen", ]
+kyushu_line <- tracks[tracks$Name == "Kyushu Shinkansen", ]
+nagano_line <- tracks[tracks$Name == "Nagano Shinkansen", ]
+plot_mapbox() %>%
+  add_markers(data = data, x = ~lon, y = ~lat, color = ~Company, hoverinfo = "text",
+              text = ~paste0("<b>Station_Name:", Station_Name,"<br><b>Company: </b>", 
+                             Company, "<br><b>Year: </b>", Year)) %>%
+  add_sf(data = tohoku_line, color = I("orange"), name = "Tohoku Line", inherit = FALSE) %>%
+  add_sf(data = akita_line, color = I("red"), name = "Akita Line", inherit = FALSE) %>%
+  add_sf(data = yamagata_line, color = I("gold"), name = "Yamagata Line", inherit = FALSE) %>%
+  add_sf(data = joetsu_line , color = I("plum"), name = "Joetsu Line", inherit = FALSE) %>%
+  add_sf(data = tokaido_line, color = I("turquoise"), name = "Tokaido Line", inherit = FALSE) %>%
+  add_sf(data = sanyo_line, color = I("green"), name = "Sanyo Line", inherit = FALSE) %>%
+  add_sf(data = kyushu_line, color = I("purple"), name = "Kyushu Line", inherit = FALSE) %>%
+  add_sf(data = nagano_line, color = I("pink"), name = "Nagano Line", inherit = FALSE) %>%
+  layout(title = "The Shinkansen System",
+         xaxis = list(title = ""),
+         yaxis = list(title = ""),
+         margin = list(l = 25, r = 25, b = 25, t = 50),
+         font = list(family = "Arial", color = "black"),
+         mapbox = list(style = "mapbox://styles/mapbox/light-v10",
+                       accesstoken = Sys.getenv("MAPBOX_TOKEN"),
+                       center = list(lon = 138.849, lat = 36.3),
+                       zoom = 5))
+```
+
+
+## Expansion of Shinkansen System 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+years <- sort(unique(data$Year))
+data$Company <- as.factor(data$Company)
+color_palette <- brewer.pal(length(levels(data$Company)), "Set2")
+company_colors <- setNames(color_palette, levels(data$Company))
+frames <- lapply(years, function(year) {
+  frame_data <- data %>% filter(Year <= year)
+  list(
+    data = list(
+      list(
+        type = 'scattermapbox',
+        lon = frame_data$lon,
+        lat = frame_data$lat,
+        text = frame_data$Station_Name,
+        mode = 'markers',
+        marker = list(size = 6, color = company_colors[frame_data$Company]),
+        showlegend = FALSE  # Set showlegend to FALSE to prevent duplicate legends
+      )
+    ),
+    name = as.character(year)
+  )
+})
+initial_year <- min(years)
+initial_data <- data %>% filter(Year <= initial_year)
+plot2 <- plot_mapbox() %>%
+  layout(
+    title = "Expansion of the Shinkansen System",
+    mapbox = list(
+      style = "mapbox://styles/mapbox/light-v10",
+      accesstoken = Sys.getenv("MAPBOX_TOKEN"),
+      center = list(lon = 138.849, lat = 36.3),
+      zoom = 5
+    ),
+    legend = list(orientation = 'v', y = 1, x = 1, traceorder = 'normal')
+  )
+plot2 <- plot2 %>%
+  add_trace(
+    data = initial_data,
+    type = 'scattermapbox',
+    lon = ~lon,
+    lat = ~lat,
+    text = ~Station_Name,
+    mode = 'markers',
+    marker = list(size = 6, color = company_colors[initial_data$Company]),
+    showlegend = FALSE
+  )
+for (company in levels(data$Company)) {
+  plot2 <- plot2 %>%
+    add_trace(
+      type = 'scattermapbox',
+      lon = NA,  
+      lat = NA,
+      mode = 'markers',
+      marker = list(size = 10, color = company_colors[company]),
+      name = company,
+      showlegend = TRUE 
+    )
+}
+plot2$x$frames <- frames
+plot2 <- plot2 %>%
+  layout(
+    sliders = list(
+      list(
+        active = 0,
+        steps = lapply(years, function(y) {
+          list(
+            method = "animate",
+            args = list(list(y), list(mode = "immediate", frame = list(duration = 300))),
+            label = y
+          )
+        }),
+        x = 0.1,
+        len = 0.9,
+        xanchor = "left",
+        yanchor = "top"
+      )
+    )
+  )
+plot2
+```
+
+## Graph Visualization of Shinkansen System
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+nodes <- unique(c("Tokyo", data$Station_Name))
+edges <- data.frame(from = rep("Tokyo", length(nodes)-1), to = nodes[nodes != "Tokyo"]) 
+coords <- data.frame(name = nodes, lat = data$lat[match(nodes, data$Station_Name)], 
+                     lon = data$lon[match(nodes, data$Station_Name)])
+
+years <- data$Year
+distances_to_tokyo <- data$Distance.from.Tokyo.st[match(nodes, data$Station_Name)]
+g <- graph_from_data_frame(edges, directed = TRUE)
+
+distances <- mapply(function(from, to) {
+  if (from != to) {
+    from_coords <- c(coords$lon[coords$name == from], coords$lat[coords$name == from])
+    to_coords <- c(coords$lon[coords$name == to], coords$lat[coords$name == to])
+    return(geosphere::distHaversine(from_coords, to_coords))
+  } else {
+    return(0) 
+  }
+}, edges$from, edges$to)
+E(g)$weight <- distances
+
+layout <- layout_with_kk(g)
+x <- layout[, 1]
+y <- layout[, 2]
+names <- V(g)$name
+
+edge_x <- c()
+edge_y <- c()
+for (eid in E(g)) {
+  edge_x <- c(edge_x, x[head_of(g, eid)], x[tail_of(g, eid)], NA)
+  edge_y <- c(edge_y, y[head_of(g, eid)], y[tail_of(g, eid)], NA)
+}
+
+plot_ly() %>%
+  add_trace(x = ~edge_x, y = ~edge_y, type = 'scatter', mode = 'lines', 
+            line = list(color = 'grey', width = 1)) %>%
+  add_trace(x = ~x, y = ~y, text = ~names, type = 'scatter', mode = 'markers',
+            marker = list(size = 10, color = ~years, coloraxis = 'coloraxis'),
+            textposition = 'bottom center', hoverinfo = "text", 
+            hovertemplate = "<b>%{text}</b><br>Year Opened: %{marker.color}<br>Distance to Tokyo: %{customdata} km<extra></extra>",
+            customdata = ~distances_to_tokyo) %>%
+  layout(xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         showlegend = FALSE,
+         coloraxis = list(colorscale = 'Viridis', colorbar = list(title = "Year Opened"))) 
+```
+<div style="font-size: 0.8em;">
+  <ul>
+    <li>The length of the edges represents the distance between the stations to Tokyo.</li>
+    <li>The color of the nodes represents the year the station was opened.</li>
+  </ul>
+</div>
+
+
+## Summary
+- Retrieve and clean the Shinkansen station data.
+- Box plot - Study on the operating companies
+- Map plot - Expansion of Shinkansen System
+- Graph plot - Relationship between the stations and the distance to Tokyo
+
+

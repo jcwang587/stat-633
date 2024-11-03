@@ -1,0 +1,24 @@
+---
+title: "HW5"
+author: "Owen Gallagher, Nikki Lin, Jiacheng Wang"
+date: "2024-03-13"
+output: 
+  ioslides_presentation:
+    widescreen: yes
+    css: styles.css
+runtime: shiny
+---
+
+```{r setup, include=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(plotly)
+library(countrycode)
+
+
+#load in world data
+world.data <- read.csv('japan_cities.csv')
+happy.data <- read.csv('shinkansen_stations.csv')
+
+
+```

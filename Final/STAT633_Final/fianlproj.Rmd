@@ -1,0 +1,65 @@
+---
+title: "Final Presentation"
+author: "Ping Yang"
+date: "2024-05-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## HEV Sales
+
+```{r, echo=FALSE}
+library(plotly)
+library(reshape2)
+library(RColorBrewer)
+```
+
+```{r}
+# load the data
+data <- readxl::read_excel("10301_hev_sale_2-28-20.xlsx")
+
+# reshape the data
+hev_sales_long <- melt(data, id.vars = "Vehicle", variable.name = "year", value.name = "sales")
+
+# sum the sales by model
+total_sales <- hev_sales_long %>%
+  group_by(Vehicle) %>%
+  summarise(total_sales = sum(sales))
+
+# add the total sales to the long data
+hev_sales_long <- merge(hev_sales_long, total_sales, by = "Vehicle")
+
+# change the order of the models by total sales
+hev_sales_long$Vehicle <- factor(hev_sales_long$Vehicle, levels = total_sales$Vehicle[order(total_sales$total_sales, decreasing = FALSE)])
+
+# generate color palette
+num_models <- length(unique(hev_sales_long$Vehicle))
+custom_palette <- colorRampPalette(brewer.pal(8, "Set3"))(num_models)
+
+
+# generate a stacked bar chart
+# add the hover text
+# change the stacked order to large to small
+hev_sales_long %>%
+  plot_ly() %>%
+  add_bars(
+    x = ~year, 
+    y = ~sales, 
+    color = ~Vehicle, 
+    colors = custom_palette, 
+    text = ~paste("Year: ", year, "<br>Model: ", Vehicle, "<br>Sales: ", sales, "<br>Total Sales: ", total_sales), 
+    hoverinfo = "text",
+    textposition = "none"
+    ) %>%
+  layout(
+    title = "U.S. HEV Sales by Model",
+    xaxis = list(title = "Year"),
+    yaxis = list(title = "Sales"),
+    barmode = "stack",
+    showlegend = FALSE
+  )
+
+```

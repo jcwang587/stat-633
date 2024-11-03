@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document id="1lVfyVEXxwWxrMjp9x1-9IDWLGlg">
+	<name>Japan - Shinkansen Lines</name>
+	<Schema name="__managed_schema" id="__managed_schema">
+		<SimpleField type="string" name="str:bmFtZQ==">
+			<displayName>name</displayName>
+		</SimpleField>
+		<SimpleField type="string" name="str:ZGVzY3JpcHRpb24=">
+			<displayName>description</displayName>
+		</SimpleField>
+	</Schema>
+	<gx:CascadingStyle kml:id="__managed_style_5D11025E40302DB295D1">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff00ffff</color>
+				<width>6</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_0B21A6F202302DB295D1">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_106C963B32302DB295D1</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_2D57D0C034302DB295D1</styleUrl>
+		</Pair>
+	</StyleMap>
+	<gx:CascadingStyle kml:id="__managed_style_48FCC708C3302DB295D1">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff00ffff</color>
+				<width>4</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_30C1D7C345302DB295D0">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_4ABD641E24302DB295D0</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_57B900AB4B302DB295D0</styleUrl>
+		</Pair>
+	</StyleMap>
+	<gx:CascadingStyle kml:id="__managed_style_2D57D0C034302DB295D1">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff990000</color>
+				<width>6</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_27116D48FA302DB295D0">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff0066ff</color>
+				<width>6</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_30CB9A2EA4302DB295D1">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_48FCC708C3302DB295D1</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_5D11025E40302DB295D1</styleUrl>
+		</Pair>
+	</StyleMap>
+	<gx:CascadingStyle kml:id="__managed_style_10744F90F0302DB295D0">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff0066ff</color>
+				<width>4</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_0C7AD667ED302DB295D0">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_10744F90F0302DB295D0</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_27116D48FA302DB295D0</styleUrl>
+		</Pair>
+	</StyleMap>
+	<gx:CascadingStyle kml:id="__managed_style_5211B3CFA4302DB295CF">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff33ff33</color>
+				<width>6</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_4CD0CD5B3E302DB295CF">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff33ff33</color>
+				<width>4</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_0B5A55B69B302DB295CD">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_1526EFEBCF302DB295CD</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_28BEC2A094302DB295CD</styleUrl>
+		</Pair>
+	</StyleMap>
+	<gx:CascadingStyle kml:id="__managed_style_106C963B32302DB295D1">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff990000</color>
+				<width>4</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_117BEE706B302DB295CF">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff00cc33</color>
+				<width>4</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_23C4823C88302DB295CF">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff00cc33</color>
+				<width>6</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_32C612069E302DB295CF">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_4CD0CD5B3E302DB295CF</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_5211B3CFA4302DB295CF</styleUrl>
+		</Pair>
+	</StyleMap>
+	<StyleMap id="__managed_style_0818980320302DB295CF">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_117BEE706B302DB295CF</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_23C4823C88302DB295CF</styleUrl>
+		</Pair>
+	</StyleMap>
+	<gx:CascadingStyle kml:id="__managed_style_24060EB9F0302DB295CE">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff006600</color>
+				<width>6</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_57B900AB4B302DB295D0">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff0000ff</color>
+				<width>6</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_1526EFEBCF302DB295CD">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>3.2</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_150F6922CA302DB295CE">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff006600</color>
+				<width>4</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_073DEF5048302DB295CE">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_150F6922CA302DB295CE</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_24060EB9F0302DB295CE</styleUrl>
+		</Pair>
+	</StyleMap>
+	<gx:CascadingStyle kml:id="__managed_style_28BEC2A094302DB295CD">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>4.8</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_4ABD641E24302DB295D0">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?id=22&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff0000ff</color>
+				<width>4</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>73ff0000</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<Folder id="7c4eabdd_0">
+		<name>Untitled layer</name>
+		<open>1</open>
+		<styleUrl>#__managed_style_0B5A55B69B302DB295CD</styleUrl>
+		<Placemark id="7c4eabdd_K5GZSUIQSYEE0674EC5811000001">
+			<name>Tohoku Shinkansen</name>
+			<description><![CDATA[<div><b>name</b>: Tohoku Shinkansen</div><div><b>description</b>: <i>empty</i></div>]]></description>
+			<styleUrl>#__managed_style_073DEF5048302DB295CE</styleUrl>
+			<ExtendedData>
+				<SchemaData schemaUrl="#__managed_schema">
+					<SimpleData name="str:bmFtZQ==">Tohoku Shinkansen</SimpleData>
+					<SimpleData name="str:ZGVzY3JpcHRpb24="></SimpleData>
+				</SchemaData>
+			</ExtendedData>
+			<LineString>
+				<coordinates>
+					141.487427,40.514634,0 141.306152,40.275335,0 141.157837,39.712258,0 141.115265,39.390571,0 141.113892,39.286483,0 141.145134,39.139115,0 141.137581,38.92603,0 141.071663,38.749264,0 140.966949,38.571253,0 140.881805,38.260828,0 140.632553,37.99481,0 140.458832,37.753887,0 140.360641,37.401256,0 140.212326,37.128024,0 140.047531,36.961963,0 139.883423,36.55543,0 139.806519,36.314295,0 139.623871,35.906015,0 139.777164,35.713765,0 139.767208,35.680892,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark id="7c4eabdd_K5GZSUIQSYEE0674EC5811000002">
+			<name>Akita Shinkansen</name>
+			<description><![CDATA[<div><b>name</b>: Akita Shinkansen</div><div><b>description</b>: <i>empty</i></div>]]></description>
+			<styleUrl>#__managed_style_0818980320302DB295CF</styleUrl>
+			<ExtendedData>
+				<SchemaData schemaUrl="#__managed_schema">
+					<SimpleData name="str:bmFtZQ==">Akita Shinkansen</SimpleData>
+					<SimpleData name="str:ZGVzY3JpcHRpb24="></SimpleData>
+				</SchemaData>
+			</ExtendedData>
+			<LineString>
+				<coordinates>
+					140.12958,39.71775,0 140.479517,39.46508900000001,0 140.57178,39.59166,0 140.72078,39.70005,0 140.97518,39.68922,0 141.15509,39.71458,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark id="7c4eabdd_K5GZSUIQSYEE0674EC5811000003">
+			<name>Yamagata Shinkansen</name>
+			<description><![CDATA[<div><b>name</b>: Yamagata Shinkansen</div><div><b>description</b>: <i>empty</i></div>]]></description>
+			<styleUrl>#__managed_style_32C612069E302DB295CF</styleUrl>
+			<ExtendedData>
+				<SchemaData schemaUrl="#__managed_schema">
+					<SimpleData name="str:bmFtZQ==">Yamagata Shinkansen</SimpleData>
+					<SimpleData name="str:ZGVzY3JpcHRpb24="></SimpleData>
+				</SchemaData>
+			</ExtendedData>
+			<LineString>
+				<coordinates>
+					140.306053,38.762704,0 140.376434,38.595729,0 140.386391,38.477298,0 140.383987,38.450685,0 140.368881,38.360288,0 140.333176,38.26595,0 140.277557,38.152107,0 140.151901,37.992645,0 140.128555,37.910075,0 140.458145,37.755516,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark id="7c4eabdd_K5GZSUIQSYEE0674EC5811000004">
+			<name>Nagano Shinkansen</name>
+			<description><![CDATA[<div><b>name</b>: Nagano Shinkansen</div><div><b>description</b>: <i>empty</i></div>]]></description>
+			<styleUrl>#__managed_style_0C7AD667ED302DB295D0</styleUrl>
+			<ExtendedData>
+				<SchemaData schemaUrl="#__managed_schema">
+					<SimpleData name="str:bmFtZQ==">Nagano Shinkansen</SimpleData>
+					<SimpleData name="str:ZGVzY3JpcHRpb24="></SimpleData>
+				</SchemaData>
+			</ExtendedData>
+			<LineString>
+				<coordinates>
+					138.189468,36.643355,0 138.248863,36.396415,0 138.463783,36.278323,0 138.634071,36.34389,0 138.849335,36.361863,0 139.001083,36.322594,0 139.189911,36.242889,0 139.388695,36.138707,0 139.619751,35.900731,0 139.77047,35.71251,0 139.76532,35.684072,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark id="7c4eabdd_K5GZSUIQSYEE0674EC5811000005">
+			<name>Joetsu Shinkansen</name>
+			<description><![CDATA[<div><b>name</b>: Joetsu Shinkansen</div><div><b>description</b>: <i>empty</i></div>]]></description>
+			<styleUrl>#__managed_style_30C1D7C345302DB295D0</styleUrl>
+			<ExtendedData>
+				<SchemaData schemaUrl="#__managed_schema">
+					<SimpleData name="str:bmFtZQ==">Joetsu Shinkansen</SimpleData>
+					<SimpleData name="str:ZGVzY3JpcHRpb24="></SimpleData>
+				</SchemaData>
+			</ExtendedData>
+			<LineString>
+				<coordinates>
+					139.036102,37.916034,0 138.961945,37.63816,0 138.853455,37.448151,0 138.922119,37.167704,0 138.808994,36.936378,0 138.977394,36.691823,0 139.00383,36.323424,0 139.189911,36.245935,0 139.391098,36.14064700000001,0 139.621811,35.9024,0 139.77459,35.712789,0 139.764633,35.682398,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark id="7c4eabdd_K5GZSUIQSYEE0674EC5811000006">
+			<name>Tokaido Shinkansen</name>
+			<description><![CDATA[<div><b>name</b>: Tokaido Shinkansen</div><div><b>description</b>: <i>empty</i></div>]]></description>
+			<styleUrl>#__managed_style_0B21A6F202302DB295D1</styleUrl>
+			<ExtendedData>
+				<SchemaData schemaUrl="#__managed_schema">
+					<SimpleData name="str:bmFtZQ==">Tokaido Shinkansen</SimpleData>
+					<SimpleData name="str:ZGVzY3JpcHRpb24="></SimpleData>
+				</SchemaData>
+			</ExtendedData>
+			<LineString>
+				<coordinates>
+					139.766006,35.680865,0 139.738884,35.629814,0 139.618034,35.507077,0 139.154549,35.256133,0 139.077473,35.103479,0 138.918686,35.119909,0 138.662567,35.143213,0 138.386536,34.970938,0 137.725983,34.712267,0 137.38884,34.769256,0 137.059593,34.968406,0 136.881065,35.171563,0 136.685028,35.316246,0 136.369858,35.362176,0 135.768356,35.014252,0 135.505371,34.693638,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark id="7c4eabdd_K5GZSUIQSYEE0674EC5811000007">
+			<name>Sanyo Shinkansen</name>
+			<description><![CDATA[<div><b>name</b>: Sanyo Shinkansen</div><div><b>description</b>: <i>empty</i></div>]]></description>
+			<styleUrl>#__managed_style_0B21A6F202302DB295D1</styleUrl>
+			<ExtendedData>
+				<SchemaData schemaUrl="#__managed_schema">
+					<SimpleData name="str:bmFtZQ==">Sanyo Shinkansen</SimpleData>
+					<SimpleData name="str:ZGVzY3JpcHRpb24="></SimpleData>
+				</SchemaData>
+			</ExtendedData>
+			<LineString>
+				<coordinates>
+					135.50537,34.69363,0 135.19672,34.7069,0 134.96051,34.66738,0 134.69101,34.82676,0 134.47334,34.81746,0 133.9175,34.66625,0 133.6782,34.5651,0 133.34587,34.48788,0 133.19034,34.42985,0 133.08322,34.39997,0 132.75878,34.38906,0 132.47623,34.39784,0 132.341309,34.391046,0 132.18132,34.224861,0 132.14973,34.16508,0 131.80194,34.05066,0 131.39682,34.09275,0 131.15993,34.05351,0 130.9481,34.00628,0 130.88287,33.88837,0 130.42007,33.58802,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark id="7c4eabdd_K5GZSUIQSYEE0674EC5811000008">
+			<name>Kyushu Shinkansen</name>
+			<description><![CDATA[<div><b>name</b>: Kyushu Shinkansen</div><div><b>description</b>: <i>empty</i></div>]]></description>
+			<styleUrl>#__managed_style_30CB9A2EA4302DB295D1</styleUrl>
+			<ExtendedData>
+				<SchemaData schemaUrl="#__managed_schema">
+					<SimpleData name="str:bmFtZQ==">Kyushu Shinkansen</SimpleData>
+					<SimpleData name="str:ZGVzY3JpcHRpb24="></SimpleData>
+				</SchemaData>
+			</ExtendedData>
+			<LineString>
+				<coordinates>
+					130.634651,32.517868,0 130.427971,32.210768,0 130.358276,32.088159,0 130.311584,31.813396,0 130.540924,31.584677,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>

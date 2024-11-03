@@ -1,0 +1,83 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-04-18"
+---
+
+```{r}
+library(dplyr)
+library(ggmap)
+
+api_key <- ""
+register_google(key = api_key)
+
+shinkansen_stations <- read.csv("shinkansen_stations.csv")
+japan_cities <- read.csv("japan_cities.csv")
+
+# Merge step 1 (optional): first merge by japan_cities dataset
+colnames(japan_cities)[which(names(japan_cities) == "city")] <- "Station_Name"
+data_1 <- merge(shinkansen_stations, japan_cities, by = "Station_Name")
+
+print(nrow(data_1))
+
+# Merge step 2.1: first request from google API
+stations <- shinkansen_stations$Station_Name
+coords <- geocode(stations)
+data_2 <- cbind(shinkansen_stations, coords)
+
+print(nrow(data_2[is.na(data_2$lat),]))
+
+# Merge step 2.2: check the warning messages 
+# The station "Shin-Omura" is erroneously geocoded to a city in China
+data_2[data_2$Station_Name == "Shin-Omura",]$lat <- NA
+data_2[data_2$Station_Name == "Shin-Omura",]$lon <- NA
+
+print(nrow(data_2[is.na(data_2$lat),]))
+
+# Merge step 3: fill the NA values with the japan_cities dataset
+colnames(japan_cities)[which(names(japan_cities) == "latitude")] <- "lat"
+colnames(japan_cities)[which(names(japan_cities) == "longitude")] <- "lon"
+
+na_cities <- data_2[is.na(data_2$lat),]$Station_Name
+for (i in 1:length(na_cities)){
+  if (na_cities[i] %in% japan_cities$Station_Name){
+    data_2[data_2$Station_Name == na_cities[i],]$lat <- japan_cities[japan_cities$Station_Name == na_cities[i],]$lat
+    data_2[data_2$Station_Name == na_cities[i],]$lon <- japan_cities[japan_cities$Station_Name == na_cities[i],]$lon
+  }
+}
+
+print(nrow(data_2[is.na(data_2$lat),]))
+
+# Merge step 4: hardcode the missing values
+missing_cities <- data_2[is.na(data_2$lat),]$Station_Name
+print(missing_cities)
+
+data_2[data_2$Station_Name == "Asa",]$lat <- 34.0540
+data_2[data_2$Station_Name == "Asa",]$lon <- 131.1606
+data_2[data_2$Station_Name == "Takahata",]$lat <- 37.9923
+data_2[data_2$Station_Name == "Takahata",]$lon <- 140.1528
+data_2[data_2$Station_Name == "Akayu",]$lat <- 38.0471
+data_2[data_2$Station_Name == "Akayu",]$lon <- 140.1492
+data_2[data_2$Station_Name == "Murayama",]$lat <- 38.4771
+data_2[data_2$Station_Name == "Murayama",]$lon <- 140.3864
+data_2[data_2$Station_Name == "Sakudaira",]$lat <- 36.2779
+data_2[data_2$Station_Name == "Sakudaira",]$lon <- 138.4639
+data_2[data_2$Station_Name == "Iyama",]$lat <- 36.8456
+data_2[data_2$Station_Name == "Iyama",]$lon <- 138.3587
+data_2[data_2$Station_Name == "Shin-Omura",]$lat <- 32.9330
+data_2[data_2$Station_Name == "Shin-Omura",]$lon <- 129.9571
+
+print(nrow(data_2[is.na(data_2$lat),]))
+
+# Data characteristics
+# 1. stations in same city from different companies
+print(data_2[duplicated(data_2$Station_Name),]$Station_Name)
+
+# 2. stations within multiple lines from the same company
+print(data_2[grepl(",", data_2$Shinkansen_Line),]$Station_Name)
+
+# Export the final dataset
+write.csv(data_2, "shinkansen_stations_geocoded.csv", row.names = FALSE)
+
+```
+
